@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ProjectAPI.Models
 {
-    public class Project
+    public class Project : IEntity
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

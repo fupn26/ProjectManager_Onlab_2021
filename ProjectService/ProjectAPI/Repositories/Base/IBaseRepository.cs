@@ -1,10 +1,11 @@
 ﻿using MongoDB.Driver;
+using ProjectAPI.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ProjectAPI.Repositories.Base
 {
-    public interface IBaseRepository<TEntity> where TEntity : class
+    public interface IBaseRepository<TEntity> where TEntity : IEntity
     {
         Task Create(TEntity objectToCreate);
         Task<ReplaceOneResult> Update(TEntity objToUpdate);

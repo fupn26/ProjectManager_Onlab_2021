@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ServiceStack;
 using MongoDB.Bson;
+using ProjectAPI.Models;
 
 namespace ProjectAPI.Repositories.Base
 {
-    public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
+    public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : IEntity
     {
         protected readonly IMongoCollection<TEntity> _collection;
 
@@ -49,9 +50,10 @@ namespace ProjectAPI.Repositories.Base
             return await entities.ToListAsync();
         }
 
-        public virtual async Task<ReplaceOneResult> Update(TEntity objToUpdate)
+        public async Task<ReplaceOneResult> Update(TEntity objToUpdate)
         {
-            return await _collection.ReplaceOneAsync(Builders<TEntity>.Filter.Eq("_id", objToUpdate.GetId()), objToUpdate);
+            var objectId = new ObjectId(objToUpdate.Id);
+            return await _collection.ReplaceOneAsync(Builders<TEntity>.Filter.Eq("_id", objectId), objToUpdate);
         }
     }
 }

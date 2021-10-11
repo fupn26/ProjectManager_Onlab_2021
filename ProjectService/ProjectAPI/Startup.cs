@@ -43,7 +43,7 @@ namespace ProjectAPI
             services.AddSingleton<ICommentRepository, CommentRepository>();
             services.AddSingleton<ITodoRepository, ToDoRepository>();
             services.AddSingleton<IProjectRepository, ProjectRepository>();
-            services.AddSingleton<IProjectService, ProjectService>();
+            // services.AddSingleton<IProjectService, ProjectService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

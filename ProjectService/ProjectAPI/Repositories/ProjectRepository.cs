@@ -21,11 +21,5 @@ namespace ProjectAPI.Repositories
             };
             _collection.Indexes.CreateOne(new CreateIndexModel<Project>(indexKeyDefinitions, createIndexOptions));
         }
-
-        public override async Task<ReplaceOneResult> Update(Project objToUpdate)
-        {
-            var objectId = new ObjectId(objToUpdate.Id);
-            return await _collection.ReplaceOneAsync(Builders<Project>.Filter.Eq("_id", objectId), objToUpdate);
-        }
     }
 }

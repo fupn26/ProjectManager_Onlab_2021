@@ -5,6 +5,7 @@ using ProjectAPI.Repositories;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MongoDB.Driver;
 
 namespace ProjectAPI.Controllers
 {
@@ -22,11 +23,6 @@ namespace ProjectAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Project>> Create(ProjectCreateDto projectToCreate)
         {
-//            if (!projectToCreate.IsValid())
-//            {
-//                return NotFound();
-//            }
-
             var project = new Project
             {
                 Title = projectToCreate.Title,
@@ -35,7 +31,14 @@ namespace ProjectAPI.Controllers
                 Tasks = new List<string>()
             };
 
-            await _repository.Create(project);
+            try
+            {
+                await _repository.Create(project);
+            }
+            catch (MongoWriteException e)
+            {
+                return BadRequest(e.Message);
+            }
 
             return CreatedAtRoute("GetProject", new { id = project.Id.ToString() }, project);
         }
@@ -72,7 +75,14 @@ namespace ProjectAPI.Controllers
 
             project.Title = projectToUpdate.NewTitle;
 
-            await _repository.Update(project);
+            try
+            {
+                await _repository.Update(project);
+            }
+            catch (MongoWriteException e)
+            {
+                return BadRequest(e.Message);
+            }
 
             return Ok();
         }

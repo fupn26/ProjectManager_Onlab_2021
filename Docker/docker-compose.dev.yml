@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  api_gateway:
+    image: traefik:v2.5
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--api.dashboard=true"
+    ports:
+      - "5000:80"
+      - "5001:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - project-network
+
+  project_service:
+    build:
+      context: ../ProjectService
+      dockerfile: ProjectAPI/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - project-network
+    ports:
+      - "5002:80" # for accessing Swagger
+    depends_on:
+      - project_mongo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.project.rule=PathPrefix(`/api/v1/project`)"
+      - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`)"
+      - "traefik.http.routers.todo.rule=PathPrefix(`/api/v1/todo`)"
+
+  project_mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - project-network
+
+networks:
+  project-network:

@@ -62,7 +62,8 @@ namespace ProjectAPI
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ProjectAPI v1"));
             }
 
-            app.UseHttpsRedirection();
+            // FIXME make sure it's working with docker
+            // app.UseHttpsRedirection();
 
             app.UseRouting();
 

@@ -1,10 +1,10 @@
 import {EventEmitter} from 'events';
 import dispatcher from "../dispatcher/Dispatcher";
-import * as actions from '../dispatcher/IssueActionConstants';
+import * as actions from '../dispatcher/ProjectActionConstants';
 
-class IssueStore extends EventEmitter{
+class ProjectStore extends EventEmitter{
 
-    _qeTasks = [];
+    _projects = [];
 
     emitChange(){
         this.emit('Change');
@@ -19,11 +19,11 @@ class IssueStore extends EventEmitter{
     }
 }
 
-const store = new IssueStore();
+const store = new ProjectStore();
 export default store;
 
 dispatcher.register(({action,payload})=>{
-    if(action !== actions.refreshTasks ) return;
-    store._qeTasks = payload;
+    if(action !== actions.refreshProjects ) return;
+    store._projects = payload;
     store.emitChange();
 });

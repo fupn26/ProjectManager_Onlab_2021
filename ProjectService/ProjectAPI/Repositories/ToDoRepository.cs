@@ -1,12 +1,12 @@
 ﻿using ProjectAPI.Models;
-using ProjectAPI.Models.DbContext;
-using ProjectAPI.Repositories.Base;
+using MongoDAL.Repositories;
+using MongoDAL.Context;
 
 namespace ProjectAPI.Repositories
 {
     public class ToDoRepository : BaseRepository<ToDo>, ITodoRepository
     {
-        public ToDoRepository(IProjectDbContext context) : base(context)
+        public ToDoRepository(IDbContext context) : base(context)
         {
         }
     }

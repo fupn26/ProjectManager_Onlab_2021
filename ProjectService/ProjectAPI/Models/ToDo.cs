@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MongoDAL.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 

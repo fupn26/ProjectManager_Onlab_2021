@@ -1,12 +1,12 @@
-﻿using ProjectAPI.Models;
-using ProjectAPI.Models.DbContext;
-using ProjectAPI.Repositories.Base;
+﻿using MongoDAL.Context;
+using ProjectAPI.Models;
+using MongoDAL.Repositories;
 
 namespace ProjectAPI.Repositories
 {
     public class CommentRepository : BaseRepository<Comment>, ICommentRepository
     {
-        public CommentRepository(IProjectDbContext context) : base(context)
+        public CommentRepository(IDbContext context) : base(context)
         {
         }
     }

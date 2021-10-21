@@ -3,17 +3,18 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using ProjectAPI.Models.DbContext;
-using ProjectAPI.Models.DbSettings;
 using ProjectAPI.Repositories;
-using ProjectAPI.Services;
+using MongoDAL.Settings;
+using ProjectAPI.Models.DbSettings;
+using MongoDAL.Context;
 
 namespace ProjectAPI
 {
     public class Startup
     {
+        private const string _nameOfDbSettings = "ProjectDbSettings";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -24,10 +25,8 @@ namespace ProjectAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<ProjectDbSettings>(
-                Configuration.GetSection(nameof(ProjectDbSettings)));
-            services.AddSingleton<IProjectDbSettings>(sp =>
-                sp.GetRequiredService<IOptions<ProjectDbSettings>>().Value);
+            services.Configure<DbSettings>(
+                Configuration.GetSection(_nameOfDbSettings));
 
             services.Configure<ProjectCollectionSettings>(
                 Configuration.GetSection(nameof(ProjectCollectionSettings))
@@ -39,11 +38,10 @@ namespace ProjectAPI
                 Configuration.GetSection(nameof(CommentCollectionSettings))
             );
 
-            services.AddSingleton<IProjectDbContext, ProjectDbContext>();
+            services.AddSingleton<IDbContext, DbContext>();
             services.AddSingleton<ICommentRepository, CommentRepository>();
             services.AddSingleton<ITodoRepository, ToDoRepository>();
             services.AddSingleton<IProjectRepository, ProjectRepository>();
-            // services.AddSingleton<IProjectService, ProjectService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

@@ -1,5 +1,5 @@
-﻿using ProjectAPI.Models;
-using ProjectAPI.Repositories.Base;
+﻿using MongoDAL.Repositories;
+using ProjectAPI.Models;
 
 namespace ProjectAPI.Repositories
 {

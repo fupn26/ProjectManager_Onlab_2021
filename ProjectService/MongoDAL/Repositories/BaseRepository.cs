@@ -1,19 +1,18 @@
 ﻿using MongoDB.Driver;
-using ProjectAPI.Models.DbContext;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ServiceStack;
 using MongoDB.Bson;
-using ProjectAPI.Models;
+using MongoDAL.Entities;
+using MongoDAL.Context;
 
-namespace ProjectAPI.Repositories.Base
+namespace MongoDAL.Repositories
 {
     public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : IEntity
     {
         protected readonly IMongoCollection<TEntity> _collection;
 
-        protected BaseRepository(IProjectDbContext context)
+        protected BaseRepository(IDbContext context)
         {
             _collection = context.GetCollection<TEntity>(typeof(TEntity).Name);
         }

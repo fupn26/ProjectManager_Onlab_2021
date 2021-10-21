@@ -1,8 +1,8 @@
 ﻿using MongoDB.Driver;
 
-namespace ProjectAPI.Models.DbContext
+namespace MongoDAL.Context
 {
-    public interface IProjectDbContext
+    public interface IDbContext
     {
         IMongoCollection<T> GetCollection<T>(string name);
     }

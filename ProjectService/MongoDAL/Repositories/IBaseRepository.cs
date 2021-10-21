@@ -1,9 +1,9 @@
 ﻿using MongoDB.Driver;
-using ProjectAPI.Models;
+using MongoDAL.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ProjectAPI.Repositories.Base
+namespace MongoDAL.Repositories
 {
     public interface IBaseRepository<TEntity> where TEntity : IEntity
     {

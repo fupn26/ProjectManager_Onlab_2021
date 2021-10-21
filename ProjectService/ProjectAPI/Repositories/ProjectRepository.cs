@@ -1,9 +1,7 @@
-﻿using MongoDB.Bson;
+﻿using MongoDAL.Context;
+using MongoDAL.Repositories;
 using MongoDB.Driver;
 using ProjectAPI.Models;
-using ProjectAPI.Models.DbContext;
-using ProjectAPI.Repositories.Base;
-using System.Threading.Tasks;
 
 namespace ProjectAPI.Repositories
 {
@@ -11,7 +9,7 @@ namespace ProjectAPI.Repositories
     {
         private readonly string _indexName = "Title_Owner_Unique";
 
-        public ProjectRepository(IProjectDbContext context) : base(context)
+        public ProjectRepository(IDbContext context) : base(context)
         {
             var indexKeyDefinitions = Builders<Project>.IndexKeys.Ascending("Title").Ascending("Owner");
             var createIndexOptions = new CreateIndexOptions()

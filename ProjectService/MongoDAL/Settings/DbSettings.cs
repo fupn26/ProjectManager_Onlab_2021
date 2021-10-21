@@ -1,6 +1,6 @@
-﻿namespace ProjectAPI.Models.DbSettings
+﻿namespace MongoDAL.Settings
 {
-    public class ProjectDbSettings : IProjectDbSettings
+    public class DbSettings
     {
         public string ConnectionString { get; set; }
         public string DatabaseName { get; set; }

@@ -21,7 +21,7 @@ services:
       context: ../ProjectService
       dockerfile: ProjectAPI/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=DockerDev
     networks:
       - project-network
     ports:

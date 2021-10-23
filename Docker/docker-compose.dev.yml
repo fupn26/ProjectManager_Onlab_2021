@@ -41,5 +41,28 @@ services:
     networks:
       - project-network
 
+  meeting_service:
+    build:
+      context: ../ProjectService
+      dockerfile: MeetingAPI/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=DockerDev
+    networks:
+      - project-network
+    ports:
+      - "5003:80" # for accessing Swagger
+    depends_on:
+      - meeting_mongo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.meeting.rule=PathPrefix(`/api/v1/meeting`)"
+
+  meeting_mongo:
+    image: mongo
+    ports:
+      - "27018:27017"
+    networks:
+      - project-network
+
 networks:
   project-network:

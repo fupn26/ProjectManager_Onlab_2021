@@ -1,18 +1,19 @@
+using CommentAPI.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using ProjectAPI.Repositories;
-using MongoDAL.Settings;
 using MongoDAL.Context;
+using MongoDAL.Settings;
 
-namespace ProjectAPI
+namespace CommentAPI
 {
     public class Startup
     {
-        private const string _nameOfDbSettings = "ProjectDbSettings";
+        private const string _nameOfDbSettings = "CommentDbSettings";
 
         public Startup(IConfiguration configuration)
         {
@@ -28,12 +29,12 @@ namespace ProjectAPI
                 Configuration.GetSection(_nameOfDbSettings));
 
             services.AddSingleton<IDbContext, DbContext>();
-            services.AddSingleton<IProjectRepository, ProjectRepository>();
+            services.AddSingleton<ICommentRepository, CommentRepository>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProjectAPI", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CommentAPI", Version = "v1" });
             });
         }
 
@@ -44,11 +45,8 @@ namespace ProjectAPI
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ProjectAPI v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CommentAPI v1"));
             }
-
-            // FIXME make sure it's working with docker
-            // app.UseHttpsRedirection();
 
             app.UseRouting();
 

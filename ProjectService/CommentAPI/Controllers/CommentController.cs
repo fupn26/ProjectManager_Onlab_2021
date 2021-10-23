@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CommentAPI.Controllers.DTO;
+using CommentAPI.Models;
+using CommentAPI.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
-using ProjectAPI.Controllers.DTO;
-using ProjectAPI.Models;
-using ProjectAPI.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ProjectAPI.Controllers
+namespace CommentAPI.Controllers
 {
     [Route("api/v1/comment")]
     [ApiController]

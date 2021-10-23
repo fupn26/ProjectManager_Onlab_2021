@@ -31,8 +31,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.project.rule=PathPrefix(`/api/v1/project`)"
-      - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`)"
-      - "traefik.http.routers.todo.rule=PathPrefix(`/api/v1/todo`)"
 
   project_mongo:
     image: mongo
@@ -61,6 +59,52 @@ services:
     image: mongo
     ports:
       - "27018:27017"
+    networks:
+      - project-network
+
+  todo_service:
+    build:
+      context: ../ProjectService
+      dockerfile: ToDoAPI/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=DockerDev
+    networks:
+      - project-network
+    ports:
+      - "5004:80" # for accessing Swagger
+    depends_on:
+      - todo_mongo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.todo.rule=PathPrefix(`/api/v1/todo`)"
+
+  todo_mongo:
+    image: mongo
+    ports:
+      - "27019:27017"
+    networks:
+      - project-network
+
+  comment_service:
+    build:
+      context: ../ProjectService
+      dockerfile: CommentAPI/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=DockerDev
+    networks:
+      - project-network
+    ports:
+      - "5005:80" # for accessing Swagger
+    depends_on:
+      - comment_mongo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`)"
+
+  comment_mongo:
+    image: mongo
+    ports:
+      - "27020:27017"
     networks:
       - project-network
 

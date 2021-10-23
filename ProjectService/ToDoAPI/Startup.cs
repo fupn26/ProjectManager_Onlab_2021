@@ -1,19 +1,18 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using ProjectAPI.Repositories;
 using MongoDAL.Settings;
-using ProjectAPI.Models.DbSettings;
+using Microsoft.Extensions.Configuration;
+using ToDoAPI.Repositories;
 using MongoDAL.Context;
 
-namespace ProjectAPI
+namespace ToDoAPI
 {
     public class Startup
     {
-        private const string _nameOfDbSettings = "ProjectDbSettings";
+        private const string _nameOfDbSettings = "ToDoDbSettings";
 
         public Startup(IConfiguration configuration)
         {
@@ -28,24 +27,13 @@ namespace ProjectAPI
             services.Configure<DbSettings>(
                 Configuration.GetSection(_nameOfDbSettings));
 
-            services.Configure<ProjectCollectionSettings>(
-                Configuration.GetSection(nameof(ProjectCollectionSettings))
-            );
-            services.Configure<TaskCollectionSettings>(
-                Configuration.GetSection(nameof(TaskCollectionSettings))
-            );
-            services.Configure<CommentCollectionSettings>(
-                Configuration.GetSection(nameof(CommentCollectionSettings))
-            );
-
             services.AddSingleton<IDbContext, DbContext>();
-            services.AddSingleton<ICommentRepository, CommentRepository>();
-            services.AddSingleton<IProjectRepository, ProjectRepository>();
+            services.AddSingleton<IToDoRepository, ToDoRepository>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProjectAPI", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ToDoAPI", Version = "v1" });
             });
         }
 
@@ -58,9 +46,6 @@ namespace ProjectAPI
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ProjectAPI v1"));
             }
-
-            // FIXME make sure it's working with docker
-            // app.UseHttpsRedirection();
 
             app.UseRouting();
 

@@ -1,21 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
-using ProjectAPI.Controllers.DTO;
-using ProjectAPI.Models;
-using ProjectAPI.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ToDoAPI.Controllers.DTO;
+using ToDoAPI.Models;
+using ToDoAPI.Repositories;
 
-namespace ProjectAPI.Controllers
+namespace ToDoAPI.Controllers
 {
     [Route("api/v1/todo")]
     [ApiController]
     public class ToDoController : ControllerBase
     {
-        private readonly ITodoRepository _repository;
+        private readonly IToDoRepository _repository;
 
-        public ToDoController(ITodoRepository repository)
+        public ToDoController(IToDoRepository repository)
         {
             _repository = repository;
         }
@@ -64,7 +64,7 @@ namespace ProjectAPI.Controllers
             return result.ToList();
         }
 
-        [HttpPut("to-do/{id:length(24)}")]
+        [HttpPatch("{id:length(24)}/status/todo")]
         public async Task<IActionResult> ChangeStatusToToDo(string id)
         {
             var toDo = await _repository.Get(id);
@@ -80,7 +80,7 @@ namespace ProjectAPI.Controllers
             return Ok();
         }
 
-        [HttpPut("doing/{id:length(24)}")]
+        [HttpPatch("{id:length(24)}/status/doing")]
         public async Task<IActionResult> ChangeStatusToDoing(string id)
         {
             var toDo = await _repository.Get(id);
@@ -96,7 +96,7 @@ namespace ProjectAPI.Controllers
             return Ok();
         }
 
-        [HttpPut("done/{id:length(24)}")]
+        [HttpPatch("{id:length(24)}/status/done")]
         public async Task<IActionResult> ChangeStatusToDone(string id)
         {
             var toDo = await _repository.Get(id);

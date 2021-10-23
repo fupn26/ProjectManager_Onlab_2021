@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeetingAPI", "MeetingAPI\Me
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDoAPI", "ToDoAPI\ToDoAPI.csproj", "{C98CF5DF-04B9-4710-934D-418B5EF26B2B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentAPI", "CommentAPI\CommentAPI.csproj", "{BF86243C-639B-4103-9C9B-0B1F7B43E8B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{C98CF5DF-04B9-4710-934D-418B5EF26B2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C98CF5DF-04B9-4710-934D-418B5EF26B2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C98CF5DF-04B9-4710-934D-418B5EF26B2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF86243C-639B-4103-9C9B-0B1F7B43E8B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF86243C-639B-4103-9C9B-0B1F7B43E8B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF86243C-639B-4103-9C9B-0B1F7B43E8B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF86243C-639B-4103-9C9B-0B1F7B43E8B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

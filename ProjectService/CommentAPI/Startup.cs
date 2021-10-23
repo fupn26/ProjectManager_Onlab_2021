@@ -1,18 +1,19 @@
+using CommentAPI.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using MongoDAL.Settings;
-using Microsoft.Extensions.Configuration;
-using ToDoAPI.Repositories;
 using MongoDAL.Context;
+using MongoDAL.Settings;
 
-namespace ToDoAPI
+namespace CommentAPI
 {
     public class Startup
     {
-        private const string _nameOfDbSettings = "ToDoDbSettings";
+        private const string _nameOfDbSettings = "CommentDbSettings";
 
         public Startup(IConfiguration configuration)
         {
@@ -28,12 +29,12 @@ namespace ToDoAPI
                 Configuration.GetSection(_nameOfDbSettings));
 
             services.AddSingleton<IDbContext, DbContext>();
-            services.AddSingleton<IToDoRepository, ToDoRepository>();
+            services.AddSingleton<ICommentRepository, CommentRepository>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ToDoAPI", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CommentAPI", Version = "v1" });
             });
         }
 
@@ -44,7 +45,7 @@ namespace ToDoAPI
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ToDoAPI v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CommentAPI v1"));
             }
 
             app.UseRouting();

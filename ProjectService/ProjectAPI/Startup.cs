@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using ProjectAPI.Repositories;
 using MongoDAL.Settings;
-using ProjectAPI.Models.DbSettings;
 using MongoDAL.Context;
 
 namespace ProjectAPI
@@ -28,18 +27,7 @@ namespace ProjectAPI
             services.Configure<DbSettings>(
                 Configuration.GetSection(_nameOfDbSettings));
 
-            services.Configure<ProjectCollectionSettings>(
-                Configuration.GetSection(nameof(ProjectCollectionSettings))
-            );
-            services.Configure<TaskCollectionSettings>(
-                Configuration.GetSection(nameof(TaskCollectionSettings))
-            );
-            services.Configure<CommentCollectionSettings>(
-                Configuration.GetSection(nameof(CommentCollectionSettings))
-            );
-
             services.AddSingleton<IDbContext, DbContext>();
-            services.AddSingleton<ICommentRepository, CommentRepository>();
             services.AddSingleton<IProjectRepository, ProjectRepository>();
 
             services.AddControllers();

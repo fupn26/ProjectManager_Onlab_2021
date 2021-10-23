@@ -1,8 +1,8 @@
 ﻿using MongoDAL.Context;
-using ProjectAPI.Models;
 using MongoDAL.Repositories;
+using CommentAPI.Models;
 
-namespace ProjectAPI.Repositories
+namespace CommentAPI.Repositories
 {
     public class CommentRepository : BaseRepository<Comment>, ICommentRepository
     {

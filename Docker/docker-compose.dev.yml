@@ -22,6 +22,7 @@ services:
       dockerfile: ProjectAPI/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=DockerDev
+      - ProjectDbSettings__ConnectionString=mongodb://project_mongo:27017
     networks:
       - project-network
     ports:
@@ -32,35 +33,22 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.project.rule=PathPrefix(`/api/v1/project`)"
 
-  project_mongo:
-    image: mongo
-    ports:
-      - "27017:27017"
-    networks:
-      - project-network
-
   meeting_service:
     build:
       context: ../ProjectService
       dockerfile: MeetingAPI/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=DockerDev
+      - MeetingDbSettings__ConnectionString=mongodb://project_mongo:27017
     networks:
       - project-network
     ports:
       - "5003:80" # for accessing Swagger
     depends_on:
-      - meeting_mongo
+      - project_mongo
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.meeting.rule=PathPrefix(`/api/v1/meeting`)"
-
-  meeting_mongo:
-    image: mongo
-    ports:
-      - "27018:27017"
-    networks:
-      - project-network
 
   todo_service:
     build:
@@ -68,22 +56,16 @@ services:
       dockerfile: ToDoAPI/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=DockerDev
+      - ToDoDbSettings__ConnectionString=mongodb://project_mongo:27017
     networks:
       - project-network
     ports:
       - "5004:80" # for accessing Swagger
     depends_on:
-      - todo_mongo
+      - project_mongo
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.todo.rule=PathPrefix(`/api/v1/todo`)"
-
-  todo_mongo:
-    image: mongo
-    ports:
-      - "27019:27017"
-    networks:
-      - project-network
 
   comment_service:
     build:
@@ -91,20 +73,21 @@ services:
       dockerfile: CommentAPI/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=DockerDev
+      - CommentDbSettings__ConnectionString=mongodb://project_mongo:27017
     networks:
       - project-network
     ports:
       - "5005:80" # for accessing Swagger
     depends_on:
-      - comment_mongo
+      - project_mongo
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`)"
 
-  comment_mongo:
+  project_mongo:
     image: mongo
     ports:
-      - "27020:27017"
+      - "27017:27017"
     networks:
       - project-network
 

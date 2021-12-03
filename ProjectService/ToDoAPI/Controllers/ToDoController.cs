@@ -27,7 +27,7 @@ namespace ToDoAPI.Controllers
             {
                 ProjectId = toDoToCreate.ProjectId,
                 Title = toDoToCreate.Title,
-                Desctiption = toDoToCreate.Description,
+                Description = toDoToCreate.Description,
                 AssigneeIds = toDoToCreate.Assignees ?? new List<string>(),
                 Status = EToDoStatus.TODO
             };
@@ -45,7 +45,7 @@ namespace ToDoAPI.Controllers
         }
 
         [HttpGet("{id:length(24)}", Name = "GetToDo")]
-        public async Task<ActionResult<ToDo>> Get(string id)
+        public async Task<ActionResult<ToDo>> GetById(string id)
         {
             var toDo = await _repository.Get(id);
 
@@ -58,10 +58,18 @@ namespace ToDoAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ToDo>>> Get()
+        public async Task<ActionResult<List<ToDo>>> Get([FromQuery] string projectId)
         {
-            var result = await _repository.Get();
-            return result.ToList();
+            if (projectId == null)
+            {
+                var result = await _repository.Get();
+                return result.ToList();
+            }
+            else
+            {
+                var toDos = await _repository.GetByProjectId(projectId);
+                return toDos.ToList();
+            }
         }
 
         [HttpPatch("{id:length(24)}/status/todo")]

@@ -1,1 +1,8 @@
+@import "resources/variables";
 @import "../node_modules/bootstrap/scss/bootstrap";
+@import "resources/bootswatch";
+
+.scrollable {
+  overflow-y: auto;
+  height: 70vh;
+}

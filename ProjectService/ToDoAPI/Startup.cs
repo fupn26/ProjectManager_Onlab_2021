@@ -30,7 +30,7 @@ namespace ToDoAPI
             services.AddSingleton<IDbContext, DbContext>();
             services.AddSingleton<IToDoRepository, ToDoRepository>();
 
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ToDoAPI", Version = "v1" });

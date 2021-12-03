@@ -5,6 +5,7 @@ import * as actions from '../dispatcher/ProjectActionConstants';
 class ProjectStore extends EventEmitter{
 
     _projects = [];
+    _currentProject = null;
 
     emitChange(){
         this.emit('Change');
@@ -23,7 +24,13 @@ const store = new ProjectStore();
 export default store;
 
 dispatcher.register(({action,payload})=>{
-    if(action !== actions.refreshProjects ) return;
-    store._projects = payload;
-    store.emitChange();
+    if(action === actions.refreshProjectDetails ) {
+        console.log(`${payload.id} project update arrived to store`);
+        store._currentProject = payload;
+        store.emitChange();
+    }
+    else if(action === actions.refreshProjects ) {
+        store._projects = payload;
+        store.emitChange();
+    }
 });

@@ -11,6 +11,19 @@ const logger = winston.createLogger({
     ]
 });
 
+const _recordProject = ({title}) => {
+    axios.post('/api/v1/project', {title: title})
+        .then(() => {
+            dispatcher.dispatch({
+                action: actionConstants.projectChanged,
+                payload: null
+            });
+        })
+        .catch(err => {
+            logger.error(err);
+        });
+};
+
 const _fetchAllProjects = () => {
    axios.get('/api/v1/project')
        .then(resp => {
@@ -24,6 +37,49 @@ const _fetchAllProjects = () => {
        });
 };
 
+const _fetchProjectWithId = (id) => {
+    axios.get(`/api/v1/project/${id}`)
+        .then(resp => {
+            dispatcher.dispatch({
+                action: actionConstants.refreshProjectDetails,
+                payload: resp.data
+            });
+        })
+        .catch(err => {
+            logger.error(err);
+        });
+};
 
+const _updateProject = (id, title) => {
+    axios.put('/api/v1/project', {
+        id: id,
+        newTitle: title
+    }).then(() => {
+        dispatcher.dispatch({
+            action: actionConstants.projectChanged,
+            payload: null
+        });
+    })
+    .catch(err => {
+        logger.error(err);
+    });
+};
+
+const _deleteProject = (id) => {
+    axios.delete(`/api/v1/project/${id}`)
+        .then(() => {
+            dispatcher.dispatch({
+                action: actionConstants.projectChanged,
+                payload: null
+            });
+        })
+        .catch(err => {
+            logger.error(err);
+        });
+};
+
+export const recordProject = _recordProject;
 export const fetchAllProjects = _fetchAllProjects;
-
+export const fetchProjectWithId = _fetchProjectWithId;
+export const updateProject = _updateProject;
+export const deleteProject = _deleteProject;

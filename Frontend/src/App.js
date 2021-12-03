@@ -9,16 +9,18 @@ import {
     Switch,
     Route
 } from "react-router-dom";
-import {Container, Nav, Navbar} from "react-bootstrap";
+import {Button, Container, Nav, Navbar} from "react-bootstrap";
 import EventCalendar from "./component/calendar/EventCalendar";
 import ProjectDetails from "./component/projects/ProjectDetails";
+import ProjectRecordingForm from "./component/projects/ProjectRecordingForm";
+import TaskRecordForm from "./component/tasks/TaskRecordForm";
 
 function App() {
   return (
       <Router>
           <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
-              <Container>
-                  <Navbar.Brand href="/">PandaProject</Navbar.Brand>
+              <Container fluid>
+                  <Navbar.Brand href="/">MicroProject</Navbar.Brand>
                   <Navbar.Toggle aria-controls="responsive-navbar-nav" />
                   <Navbar.Collapse id="responsive-navbar-nav">
                       <Nav className="me-auto">
@@ -28,6 +30,7 @@ function App() {
                           <Nav.Link href="/profile">Profile</Nav.Link>
                       </Nav>
                   </Navbar.Collapse>
+                  <Button>Login</Button>
               </Container>
           </Navbar>
 
@@ -38,10 +41,12 @@ function App() {
               <Route exact path="/projects">
                   <ProjectList />
               </Route>
-              <Route path="/projects/:id" component={ProjectDetails}/>
+              <Route path="/projects/project/:id" component={ProjectDetails}/>
+              <Route path="/projects/new" component={ProjectRecordingForm}/>
               <Route path="/profile">
                   <Profile />
               </Route>
+              <Route path="/tasks/add" render={(props) => <TaskRecordForm {...props}/>}/>
               <Route path="/">
                   <Welcome />
               </Route>

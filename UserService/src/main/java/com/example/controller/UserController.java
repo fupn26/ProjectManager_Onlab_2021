@@ -45,10 +45,7 @@ public class UserController {
     }
 
     private UserDto mapToUserDto(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .build();
+        return new UserDto(user.getId(),
+                user.getUsername(), user.getEmail());
     }
 }

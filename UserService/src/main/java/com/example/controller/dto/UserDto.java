@@ -1,12 +1,13 @@
 package com.example.controller.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.*;
 
 import java.util.UUID;
 
-@Builder
 @AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class UserDto {
 
     private UUID id;

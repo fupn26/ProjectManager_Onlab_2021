@@ -1,0 +1,11 @@
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: "jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB}"
+    username: ${DB_USER}
+    password: ${DB_PASS}

@@ -5,7 +5,14 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: true
   datasource:
     url: "jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB}"
     username: ${DB_USER}
     password: ${DB_PASS}
+
+admin:
+  password: ${ADMIN_PASS}
+
+jwt:
+  secret: ${JWT_SECRET}

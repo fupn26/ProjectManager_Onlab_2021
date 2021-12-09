@@ -66,6 +66,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.todo.rule=PathPrefix(`/api/v1/todo`)"
+      - "traefik.http.middlewares.todo-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.routers.todo.middlewares=todo-auth@docker"
 
   comment_service:
     build:
@@ -84,7 +86,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`)"
 
-  user_service:
+  users:
     build: 
       context: ../UserService
       dockerfile: ./Dockerfile
@@ -94,6 +96,8 @@ services:
       - DB=${MYSQL_DB}
       - DB_USER=${MYSQL_USER}
       - DB_PASS=${MYSQL_PASSWORD}
+      - ADMIN_PASS=password
+      - JWT_SECRET=6f93a7420057e6e71ced 
       - spring_profiles_active=prod
     networks:
       - project-network
@@ -104,6 +108,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.user.rule=PathPrefix(`/api/v1/user`)"
+
 
   project_mongo:
     image: mongo

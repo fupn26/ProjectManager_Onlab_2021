@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "admin.password",
+      "type": "java.lang.String",
+      "description": "The password of the default admin user."
+    },
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Description for jwt.secret."
+    }
+  ] }

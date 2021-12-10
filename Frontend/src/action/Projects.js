@@ -46,7 +46,11 @@ const _fetchAllProjects = () => {
 };
 
 const _fetchProjectWithId = (id) => {
-    axios.get(`/api/v1/project/${id}`)
+    axios.get(`/api/v1/project/${id}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+    })
         .then(resp => {
             dispatcher.dispatch({
                 action: actionConstants.refreshProjectDetails,

@@ -3,4 +3,6 @@ module.exports = {
     loginFailed: "LOGIN_FAILED",
     logoutSuccess: "LOGOUT_SUCCESS",
     changeRedirectUri: "CHANGE_REDIRECT_URI",
+    registerSuccess: "REGISTER_SUCCESS",
+    registerFailed: "REGISTER_FAILED"
 };

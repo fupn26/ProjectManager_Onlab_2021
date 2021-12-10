@@ -14,12 +14,14 @@ class LoginForm extends React.Component {
             usernameFilled: false,
             passwordFilled: false,
             hasError: false,
-            isLoggedIn: false
+            isLoggedIn: false,
+            redirect: false
         };
         this._onUsernameChanged = this._onUsernameChanged.bind(this);
         this._onPasswordChanged = this._onPasswordChanged.bind(this);
         this._onSignIn = this._onSignIn.bind(this);
         this._updateStateFromStore = this._updateStateFromStore.bind(this);
+        this._onRegisterClick = this._onRegisterClick.bind(this);
     }
 
     _onUsernameChanged(event) {
@@ -53,6 +55,12 @@ class LoginForm extends React.Component {
         });
     }
 
+    _onRegisterClick() {
+        this.setState({
+            redirect: true
+        });
+    }
+
     componentDidMount() {
         sessionStore.addChangeListener(this._updateStateFromStore);
     }
@@ -62,6 +70,8 @@ class LoginForm extends React.Component {
     }
 
     render() {
+        if (this.state.redirect)
+            return (<Redirect to={"/register"}/>);
         return (
           <div className={"d-flex align-items-center justify-content-center"} style={{
               height: "100%"
@@ -83,7 +93,7 @@ class LoginForm extends React.Component {
                               onClick={this._onSignIn}>Sign in</Button>
                   </div>
                   <div>
-                      <Button variant={"success"} style={{margin: "1em 0 0 0", width: "100%"}}>Register</Button>
+                      <Button variant={"success"} style={{margin: "1em 0 0 0", width: "100%"}} onClick={this._onRegisterClick}>Register</Button>
                   </div>
               </div>
           </div>

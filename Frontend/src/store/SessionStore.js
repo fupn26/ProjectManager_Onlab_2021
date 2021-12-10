@@ -6,6 +6,7 @@ class SessionStore extends EventEmitter {
     _isUserLoggedIn = localStorage.getItem("token") != null;
     _isLoginError = false;
     _redirectToOnSuccess = "/projects";
+    _registerError = false;
 
     emitChange(){
         this.emit('Change');
@@ -39,6 +40,14 @@ dispatcher.register(({action, payload})=>{
     }
     else if (action === actions.changeRedirectUri) {
         store._redirectToOnSuccess = payload;
+        store.emitChange();
+    }
+    else if (action === actions.registerSuccess) {
+        store._registerError = false;
+        store.emitChange();
+    }
+    else if (action === actions.registerFailed) {
+        store._registerError = true;
         store.emitChange();
     }
 });

@@ -1,5 +1,5 @@
 import axios from "axios";
-import {loginFailed, loginSuccess} from "../dispatcher/SessionActionConstants";
+import {loginFailed, loginSuccess, registerFailed, registerSuccess} from "../dispatcher/SessionActionConstants";
 import dispatcher from "../dispatcher/Dispatcher";
 import {userListArrived} from "../dispatcher/UserActionConstants";
 import winston from "winston";
@@ -42,5 +42,24 @@ export function getUsers() {
         })
         .catch(error => {
             logger.error(error);
+        });
+}
+
+export function registerUser(email, username, password) {
+    axios.post('/api/v1/user/register', {
+        email: email,
+        username: username,
+        password: password
+    })
+        .then(response => {
+            dispatcher.dispatch({
+                action: registerSuccess,
+                payload: response.data
+            });
+        })
+        .catch(() => {
+            dispatcher.dispatch({
+                action: registerFailed
+            });
         });
 }

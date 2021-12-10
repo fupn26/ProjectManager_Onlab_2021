@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using MongoDB.Driver;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using RabbitMQ.Client;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace ProjectAPI.Controllers
 {
@@ -45,6 +48,7 @@ namespace ProjectAPI.Controllers
             try
             {
                 await _repository.Create(project);
+                sendTaskCreatedMessage(project);
             }
             catch (MongoWriteException e)
             {
@@ -149,6 +153,29 @@ namespace ProjectAPI.Controllers
                 return null;
             else
                 return parts[1];
+        }
+
+        private void sendTaskCreatedMessage(Project projectToSend)
+        {
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare(queue: "hello",
+                                     durable: false,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                string message = JsonConvert.SerializeObject(projectToSend);
+                var body = Encoding.UTF8.GetBytes(message);
+
+                channel.BasicPublish(exchange: "",
+                                     routingKey: "hello",
+                                     basicProperties: null,
+                                     body: body);
+                Console.WriteLine(" [x] Sent {0}", message);
+            }
         }
     }
 }

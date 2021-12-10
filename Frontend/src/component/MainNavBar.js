@@ -2,7 +2,7 @@ import {Button, Container, Nav, Navbar} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import {useHistory} from "react-router-dom";
 import dispatcher from "../dispatcher/Dispatcher";
-import {logoutSuccess} from "../dispatcher/UserActionConstants";
+import {logoutSuccess} from "../dispatcher/SessionActionConstants";
 import sessionStore from "../store/SessionStore";
 
 const MainNavBar = () => {

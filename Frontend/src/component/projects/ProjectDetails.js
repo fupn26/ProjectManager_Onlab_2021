@@ -7,7 +7,7 @@ import {Container} from "react-bootstrap";
 import sessionStore from "../../store/SessionStore";
 import {Redirect} from "react-router-dom";
 import dispatcher from "../../dispatcher/Dispatcher";
-import {changeRedirectUri} from "../../dispatcher/UserActionConstants";
+import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";
 
 class ProjectDetails extends React.Component {
 

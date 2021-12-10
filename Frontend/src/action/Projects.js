@@ -62,10 +62,11 @@ const _fetchProjectWithId = (id) => {
         });
 };
 
-const _updateProject = (id, title) => {
+const _updateProject = (id, title, members) => {
     axios.put('/api/v1/project', {
         id: id,
-        newTitle: title
+        title: title,
+        members: members
     }, {
         headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`

@@ -121,6 +121,30 @@ services:
       - "traefik.http.routers.user.middlewares=user-auth@docker"
 
 
+  users:
+    build: 
+      context: ../UserService
+      dockerfile: ./Dockerfile
+    environment:
+      - DB_HOST=project_mysql
+      - DB_PORT=3306
+      - DB=${MYSQL_DB}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASS=${MYSQL_PASSWORD}
+      - ADMIN_PASS=password
+      - JWT_SECRET=6f93a7420057e6e71ced 
+      - spring_profiles_active=prod
+    networks:
+      - project-network
+    ports:
+      - "5006:8080" # for accessing Swagger
+    depends_on:
+      - project_mysql
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.user.rule=PathPrefix(`/api/v1/user`)"
+
+
   project_mongo:
     image: mongo
     ports:

@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 import dispatcher from "../dispatcher/Dispatcher";
-import * as actions from "../dispatcher/UserActionConstants";
+import * as actions from "../dispatcher/SessionActionConstants";
 
 class SessionStore extends EventEmitter {
     _isUserLoggedIn = localStorage.getItem("token") != null;

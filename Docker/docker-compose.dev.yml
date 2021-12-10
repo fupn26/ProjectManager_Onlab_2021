@@ -32,6 +32,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.project.rule=PathPrefix(`/api/v1/project`)"
+      - "traefik.http.middlewares.project-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.routers.project.middlewares=project-auth@docker"
 
   meeting_service:
     build:
@@ -49,6 +51,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.meeting.rule=PathPrefix(`/api/v1/meeting`)"
+      - "traefik.http.middlewares.meeting-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.routers.meeting.middlewares=meeting-auth@docker"
 
   todo_service:
     build:
@@ -85,6 +89,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`)"
+      - "traefik.http.middlewares.comment-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.routers.comment.middlewares=comment-auth@docker"
 
   users:
     build: 
@@ -107,7 +113,12 @@ services:
       - project_mysql
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/api/v1/user/auth`)"
+      - "traefik.http.routers.register.rule=PathPrefix(`/api/v1/user/register`)"
+      - "traefik.http.routers.signin.rule=PathPrefix(`/api/v1/user/signin`)"
       - "traefik.http.routers.user.rule=PathPrefix(`/api/v1/user`)"
+      - "traefik.http.middlewares.user-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.routers.user.middlewares=user-auth@docker"
 
 
   project_mongo:

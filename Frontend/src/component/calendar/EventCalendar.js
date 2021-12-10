@@ -2,7 +2,7 @@ import React from "react";
 import Calendar from 'react-awesome-calendar';
 import sessionStore from "../../store/SessionStore";
 import dispatcher from "../../dispatcher/Dispatcher";
-import {changeRedirectUri} from "../../dispatcher/UserActionConstants";
+import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";
 import {Redirect} from "react-router-dom";
 
 class EventCalendar extends React.Component {

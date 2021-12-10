@@ -15,6 +15,7 @@ import ProjectRecordingForm from "./component/projects/ProjectRecordingForm";
 import TaskRecordForm from "./component/tasks/TaskRecordForm";
 import LoginForm from "./component/users/LoginForm";
 import MainNavBar from "./component/MainNavBar";
+import ProjectUpdateForm from "./component/projects/ProjectUpdateForm";
 
 const App = () => {
     return (
@@ -28,6 +29,7 @@ const App = () => {
                     <ProjectList />
                 </Route>
                 <Route path="/projects/project/:id" component={ProjectDetails}/>
+                <Route path="/projects/update/:id" component={ProjectUpdateForm}/>
                 <Route path="/projects/new" component={ProjectRecordingForm}/>
                 <Route path="/profile">
                     <Profile />

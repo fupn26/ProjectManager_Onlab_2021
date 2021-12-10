@@ -6,6 +6,8 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Driver;
+using System;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace ProjectAPI.Controllers
 {
@@ -21,12 +23,21 @@ namespace ProjectAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Project>> Create(ProjectCreateDto projectToCreate)
+        public async Task<ActionResult<Project>> Create(ProjectCreateDto projectToCreate, [FromHeader] string authorization)
         {
+            if (authorization == null)
+                return BadRequest("Missing authorization header!");
+
+            string token = parseToken(authorization);
+            if (token == null)
+                return BadRequest("Wrong type of authorization header!");
+
+            var jwtToken = new JwtSecurityToken(token);
+
             var project = new Project
             {
                 Title = projectToCreate.Title,
-                Owner = "Unknown", //TODO it should be queried from the cookie/token
+                Owner = jwtToken.Subject,
                 Members = new List<string>(),
                 Tasks = new List<string>()
             };
@@ -64,8 +75,17 @@ namespace ProjectAPI.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateTitle(ProjectUpdateTitleDto projectToUpdate)
+        public async Task<IActionResult> Update(ProjectUpdateDto projectToUpdate, [FromHeader] string authorization)
         {
+            if (authorization == null)
+                return BadRequest("Missing authorization header!");
+
+            string token = parseToken(authorization);
+            if (token == null)
+                return BadRequest("Wrong type of authorization header!");
+
+            var jwtToken = new JwtSecurityToken(token);
+            
             var project = await _repository.Get(projectToUpdate.Id);
 
             if (project == null)
@@ -73,7 +93,13 @@ namespace ProjectAPI.Controllers
                 return NotFound();
             }
 
-            project.Title = projectToUpdate.NewTitle;
+            if (jwtToken.Subject != project.Owner)
+            {
+                return Forbid("Don't hava the rights to modify!");
+            }
+
+            project.Title = projectToUpdate.Title;
+            project.Members = projectToUpdate.Members;
 
             try
             {
@@ -88,18 +114,41 @@ namespace ProjectAPI.Controllers
         }
 
         [HttpDelete("{id:length(24)}")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(string id, [FromHeader] string authorization)
         {
             var project = await _repository.Get(id);
+
+            if (authorization == null)
+                return BadRequest("Missing authorization header!");
+
+            string token = parseToken(authorization);
+            if (token == null)
+                return BadRequest("Wrong type of authorization header!");
+
+            var jwtToken = new JwtSecurityToken(token);
 
             if (project == null)
             {
                 return NotFound();
             }
 
+            if (jwtToken.Subject != project.Owner)
+            {
+                return Forbid("Don't have the rights to delete!");
+            }
+
             await _repository.Delete(project.Id);
 
             return Ok();
+        }
+
+        private string parseToken(string authHeader)
+        {
+            string[] parts = authHeader.Split(null);
+            if (parts.Length != 2 || parts[0] != "Bearer")
+                return null;
+            else
+                return parts[1];
         }
     }
 }

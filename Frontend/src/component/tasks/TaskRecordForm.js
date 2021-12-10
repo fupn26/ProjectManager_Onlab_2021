@@ -4,7 +4,7 @@ import {Redirect} from "react-router-dom";
 import {createTask} from "../../action/Tasks";
 import sessionStore from "../../store/SessionStore";
 import dispatcher from "../../dispatcher/Dispatcher";
-import {changeRedirectUri} from "../../dispatcher/UserActionConstants";
+import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";
 import PropTypes from "prop-types";
 
 class TaskRecordForm extends React.Component {

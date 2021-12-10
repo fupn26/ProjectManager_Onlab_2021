@@ -3,7 +3,7 @@ import * as actions from '../../action/Projects';
 import {Redirect} from "react-router-dom";
 import sessionStore from "../../store/SessionStore";
 import dispatcher from "../../dispatcher/Dispatcher";
-import {changeRedirectUri} from "../../dispatcher/UserActionConstants";
+import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";
 
 class ProjectRecordingForm extends React.Component {
 

@@ -7,8 +7,6 @@ import taskStore from "../../store/TaskStore";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 import {Button, Card} from "react-bootstrap";
 import {doing, doings, done, dones, toDo, toDos} from "../../action/TaskStatusConstants";
-//import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
-//import {v4 as uuidV4} from 'uuid';
 
 class TaskList extends React.Component {
     constructor(props) {
@@ -70,10 +68,7 @@ class TaskList extends React.Component {
 
     render() {
         if (this.state.redirect)
-            return (<Redirect push to={{
-                pathname: '/tasks/add',
-                state: { project_id: this.props.projectid}
-            }}/>);
+            return (<Redirect push to={`/tasks/add/${this.props.projectid}`}/>);
         if (this.state.tasks === null) {
             return (<h3>{`Can't load tasks for project ${this.props.projectid}`}</h3>);
         }

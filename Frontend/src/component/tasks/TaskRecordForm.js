@@ -1,28 +1,55 @@
 import {Button, Container, Form, Stack} from "react-bootstrap";
 import React from "react";
-import PropTypes from "prop-types";
 import {Redirect} from "react-router-dom";
 import {createTask} from "../../action/Tasks";
-import store from "../../store/ProjectStore";
+import sessionStore from "../../store/SessionStore";
+import dispatcher from "../../dispatcher/Dispatcher";
+import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";
+import PropTypes from "prop-types";
 
 class TaskRecordForm extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            projectId: null,
+            projectId: this.props.match.params.id,
             title: "",
             description: "",
             redirect: null,
-            submitDisabled: true
+            submitDisabled: true,
+            isUserLoggedIn: sessionStore._isUserLoggedIn
         };
+
+        this._updateSessionStateFromStore = this._updateSessionStateFromStore.bind(this);
     }
 
     componentDidMount() {
-        if (store._currentProject == null)
-            this.setState({redirect: '/projects'});
-        else
-            this.setState({projectId: store._currentProject.id});
+        sessionStore.addChangeListener(this._updateSessionStateFromStore);
+        if (!this.state.isUserLoggedIn) {
+            dispatcher.dispatch({
+                action: changeRedirectUri,
+                payload: "/tasks/add"
+            });
+        }
+    }
+
+    componentDidUpdate() {
+        if (!this.state.isUserLoggedIn) {
+            dispatcher.dispatch({
+                action: changeRedirectUri,
+                payload: "/tasks/add"
+            });
+        }
+    }
+
+    componentWillUnmount() {
+        sessionStore.removeChangeListener(this._updateSessionStateFromStore);
+    }
+
+    _updateSessionStateFromStore() {
+        this.setState({
+            isUserLoggedIn: sessionStore._isUserLoggedIn
+        });
     }
 
     _onTitleChange = (event) => {
@@ -49,6 +76,8 @@ class TaskRecordForm extends React.Component {
     }
 
     render() {
+        if (!this.state.isUserLoggedIn)
+            return (<Redirect to={"/login"}/>);
         if (this.state.redirect !== null)
             return (<Redirect to={this.state.redirect}/>);
         // TODO: add multiselect for assignees
@@ -69,8 +98,9 @@ class TaskRecordForm extends React.Component {
 }
 
 TaskRecordForm.propTypes = {
-    location: PropTypes.object,
-    state: PropTypes.object
+    match: PropTypes.object,
+    params: PropTypes.object,
+    id: PropTypes.string
 };
 
 export default TaskRecordForm;

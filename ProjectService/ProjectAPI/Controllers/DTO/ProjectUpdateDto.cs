@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace ProjectAPI.Controllers.DTO
 {
-    public class ProjectUpdateTitleDto
+    public class ProjectUpdateDto
     {
         [Required]
         public string Id { get; set; }
         [Required]
-        public string NewTitle { get; set; }
+        public string Title { get; set; }
+        [Required]
+        public List<string> Members { get; set; }
     }
 }

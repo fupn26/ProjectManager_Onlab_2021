@@ -29,7 +29,8 @@
     "regenerator-runtime": "^0.13.7",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
-    "winston-transport-browserconsole": "^1.0.5"
+    "winston-transport-browserconsole": "^1.0.5",
+    "node-sass": "^4.14.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
@@ -45,7 +46,6 @@
     "commitlint": "^11.0.0",
     "eslint-plugin-react": "^7.20.0",
     "husky": "^4.2.5",
-    "node-sass": "^4.14.1",
     "react-test-renderer": "^16.13.1",
     "rimraf": "^3.0.2"
   },

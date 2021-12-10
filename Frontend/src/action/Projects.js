@@ -12,7 +12,11 @@ const logger = winston.createLogger({
 });
 
 const _recordProject = ({title}) => {
-    axios.post('/api/v1/project', {title: title})
+    axios.post('/api/v1/project', {title: title}, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+    })
         .then(() => {
             dispatcher.dispatch({
                 action: actionConstants.projectChanged,
@@ -25,7 +29,11 @@ const _recordProject = ({title}) => {
 };
 
 const _fetchAllProjects = () => {
-   axios.get('/api/v1/project')
+   axios.get('/api/v1/project', {
+       headers: {
+           Authorization: `Bearer ${localStorage.getItem("token")}`
+       }
+   })
        .then(resp => {
            dispatcher.dispatch({
                action: actionConstants.refreshProjects,
@@ -38,7 +46,11 @@ const _fetchAllProjects = () => {
 };
 
 const _fetchProjectWithId = (id) => {
-    axios.get(`/api/v1/project/${id}`)
+    axios.get(`/api/v1/project/${id}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+    })
         .then(resp => {
             dispatcher.dispatch({
                 action: actionConstants.refreshProjectDetails,
@@ -50,10 +62,15 @@ const _fetchProjectWithId = (id) => {
         });
 };
 
-const _updateProject = (id, title) => {
+const _updateProject = (id, title, members) => {
     axios.put('/api/v1/project', {
         id: id,
-        newTitle: title
+        title: title,
+        members: members
+    }, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
     }).then(() => {
         dispatcher.dispatch({
             action: actionConstants.projectChanged,
@@ -66,7 +83,11 @@ const _updateProject = (id, title) => {
 };
 
 const _deleteProject = (id) => {
-    axios.delete(`/api/v1/project/${id}`)
+    axios.delete(`/api/v1/project/${id}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+    })
         .then(() => {
             dispatcher.dispatch({
                 action: actionConstants.projectChanged,

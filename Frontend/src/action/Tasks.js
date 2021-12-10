@@ -16,6 +16,10 @@ export function createTask(projectId, title, description) {
         projectId: projectId,
         title: title,
         description: description
+    }, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
     })
         .then(response => dispatcher.dispatch({
             action: addTask,
@@ -26,6 +30,9 @@ export function createTask(projectId, title, description) {
 
 export function getTasks(projectId) {
     axios.get('/api/v1/todo', {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
         params: {
             projectId: projectId
         }
@@ -38,7 +45,11 @@ export function getTasks(projectId) {
 }
 
 export function changeStatus(taskId, status) {
-    axios.patch(`/api/v1/todo/${taskId}/status/${status}`)
+    axios.patch(`/api/v1/todo/${taskId}/status/${status}`, {}, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+    })
         .then(() => dispatcher.dispatch({
             action: changeTaskStatus,
             payload: null

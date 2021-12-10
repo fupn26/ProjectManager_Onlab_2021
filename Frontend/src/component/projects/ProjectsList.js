@@ -4,6 +4,9 @@ import projectChangedStore from '../../store/ProjectChangeStore';
 import * as actions from '../../action/Projects';
 import {Redirect} from "react-router-dom";
 import {Container} from "react-bootstrap";
+import sessionStore from "../../store/SessionStore";
+import dispatcher from "../../dispatcher/Dispatcher";
+import {changeRedirectUri} from "../../dispatcher/UserActionConstants";
 
 const redirectConstants = {
     projectRedirect: 'REDIRECT_TO_PROJECT',
@@ -20,23 +23,46 @@ class ProjectsList extends React.Component{
             redirect : {
                 type: null,
                 payload: null
-            }
+            },
+            isUserLoggedIn: sessionStore._isUserLoggedIn
         };
         this._getAllProjectFromStore = this._getAllProjectFromStore.bind(this);
         this._handleProjectOnClick = this._handleProjectOnClick.bind(this);
         this._fetchProjects = this._fetchProjects.bind(this);
+        this._getLoggedInStatus = this._getLoggedInStatus.bind(this);
     }
 
     componentDidMount() {
         console.log("component mounted");
+        if (!this.state.isUserLoggedIn)
+            dispatcher.dispatch({
+                action: changeRedirectUri,
+                payload: "/projects"
+            });
         this._fetchProjects();
         projectStore.addChangeListener(this._getAllProjectFromStore);
         projectChangedStore.addChangeListener(this._fetchProjects);
+        sessionStore.addChangeListener(this._getLoggedInStatus);
+    }
+
+    componentDidUpdate() {
+        if (!this.state.isUserLoggedIn)
+            dispatcher.dispatch({
+                action: changeRedirectUri,
+                payload: "/projects"
+            });
     }
 
     componentWillUnmount() {
         projectStore.removeChangeListener(this._getAllProjectFromStore);
         projectChangedStore.removeChangeListener(this._fetchProjects);
+        sessionStore.removeChangeListener(this._getLoggedInStatus);
+    }
+
+    _getLoggedInStatus() {
+        this.setState({
+            isUserLoggedIn: sessionStore._isUserLoggedIn
+        });
     }
 
     _fetchProjects() {
@@ -78,6 +104,10 @@ class ProjectsList extends React.Component{
     }
 
     render() {
+        console.log("ProjectList render");
+        if (!this.state.isUserLoggedIn) {
+            return (<Redirect to={"/login"}/>);
+        }
         if (this.state.redirect.type === redirectConstants.projectRedirect)
             return (<Redirect push to={`/projects/project/${this.state.redirect.payload}`}/>);
 

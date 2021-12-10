@@ -1,6 +1,9 @@
 import React from "react";
 import * as actions from '../../action/Projects';
 import {Redirect} from "react-router-dom";
+import sessionStore from "../../store/SessionStore";
+import dispatcher from "../../dispatcher/Dispatcher";
+import {changeRedirectUri} from "../../dispatcher/UserActionConstants";
 
 class ProjectRecordingForm extends React.Component {
 
@@ -9,9 +12,40 @@ class ProjectRecordingForm extends React.Component {
         this.state = {
             title: '',
             finished: false,
+            isUserLoggedIn: sessionStore._isUserLoggedIn
         };
         this._formOnChange = this._formOnChange.bind(this);
         this._handleSubmit = this._handleSubmit.bind(this);
+        this._updateSessionStateFromStore = this._updateSessionStateFromStore.bind(this);
+    }
+
+    componentDidMount() {
+        sessionStore.addChangeListener(this._updateSessionStateFromStore);
+        if (!this.state.isUserLoggedIn) {
+            dispatcher.dispatch({
+                action: changeRedirectUri,
+                payload: "/projects/new"
+            });
+        }
+    }
+
+    componentDidUpdate() {
+        if (!this.state.isUserLoggedIn) {
+            dispatcher.dispatch({
+                action: changeRedirectUri,
+                payload: "/projects/new"
+            });
+        }
+    }
+
+    componentWillUnmount() {
+        sessionStore.removeChangeListener(this._updateSessionStateFromStore);
+    }
+
+    _updateSessionStateFromStore() {
+        this.setState({
+            isUserLoggedIn: sessionStore._isUserLoggedIn
+        });
     }
 
     _formOnChange(event){
@@ -26,6 +60,9 @@ class ProjectRecordingForm extends React.Component {
     }
 
     render() {
+        if (!this.state.isUserLoggedIn)
+            return (<Redirect to={"/login"}/>);
+
         if (this.state.finished)
             return (<Redirect to={`/projects`}/>);
 

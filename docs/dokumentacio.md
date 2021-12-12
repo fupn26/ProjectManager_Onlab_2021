@@ -8,7 +8,9 @@ A cél egy projektkezelő alkalmazás készítése volt, mely mikroszoláltatás
 A programnak képesnek kell lennie projektek kezelésére, azon belül a feladatok állapotának nyomonkövetésére. A közös munka megkönnyítése érdekében a felhasználók az egyes feladatok alatt kommenteket írhatnak a haladásukról, vagy éppen javaslatokat tehetnek. Ezen felül a program lehetőséget ad találkozók létrehozására, mely bekerül a résztvevők naptárjába. A találkozókon elhangzott fontos információkról összefoglalókat lehet írni, mely a későbbiekben is visszanézhető. Emellett minden az adott projektben résztvevő értesítést kap a projektet érintő változásokról, módosításokról a regisztrációkor megadott e-mail címükre.
 
 ## Architektúra terv
-<center><img src="resources/project_manager.png" alt="drawing" height="450"/></center>
+<p align="center">
+<img src="resources/project_manager.png" alt="Architektúra ábra" height="450"/>
+</p>
 
 Az architektúra tervezése során a ```Domain Driven Design```-t követtem annak érdekében, hogy meghatározzam a szükséges mikroszolgáltatások körét. Ennek megfelelően összesen 5 alapvető szolgáltatásra bontottam fel az alkalmazást, melyek a ```polyglot``` elvet követve különböző programozási nyelven íródnak. A szolgáltatások elérésének biztosításáért a *Traefik API Gateway* felelős. Továbbá ezen keresztül érhető el az alkalmazás felhasználói felülete is. A szolgáltatások közötti üzenetsor alapú aszinkron kommunikációért pedig egy *RabbitMQ* példány felel.
 
@@ -39,7 +41,10 @@ A MicroProject alkalmazás több szolgáltatásból épül fel, és ezek mindegy
 Az egységes interfészen kívül még előnye az API Gateway használatának, hogy biztonságos *HTTPS* kapcsolatot elég csak kifelé biztosítani, a mögötte lévő szolgáltatások egyszerű *HTTP* protokollon kommunikálhatnak egymással. Továbbá a Traefik egyéb szolgáltatásokat is nyújt, mint például a ```Forward Authentication```, amelyről a következő fejezetben lesz szó.
 
 ## Felhasználó authentikáció
-![Authentikáció ábra](resources/authentication_flow.png)
+<p align=center>
+<img src="resources/authentication_flow.png" alt="Authentikációs ábra"/>
+</p>
+
 Annak érdekében, hogy a szoftver rendelkezzen authentikációval, továbbá authorizációval, elkészítettem a felhasználókat kezelő mikroszolgáltatást. A rendszer ezt a szolgáltatást a ```Federated Identity``` minta szerint, mint authorizációs szerver használja. Ezt úgy értem el, hogy beállítottam a **felhasználó** szolgáltatást ```Forward Auth Middleware```-ként a védeni kívánt végpontokhoz. Így a *Traefik* minden kérés előtt lekérdezi a **felhasználó** szolgáltatástól, hogy az adott felhasználó rendelkezik-e engedéllyel a többi szolgáltatás eléréséhez. Az engedély ebben az esetben azt jelenti, hogy a felhasználó redelkezik-e érvényes ```Json Web Token```-nel. Ha igen, akkor a *Traefik* továbbítja a kérést a megfelelő szolgáltatásnak, egyéb esetben pedig a felhasználót értesíti a hiba okáról.
 
 Hiba esetén a felhasználónak be kell jelentkeznie, vagy ha még nincs fiókja, akkor regisztrálni kell. Ha helyesen adta meg a hitelesítő adatait, akkor a **felhasználó** szolgáltatás generál egy új ```JWT``` tokent, melyben eltárolja az adott felhasználó azonosítóját és a token lejárati idejét, majd aláírja. Mivel minden genenerált token rendelkezik egy aláírással, amihez a titkot csak a **felhasználó** szolgáltatás ismeri, így biztosított, hogy a támadók kellően nehezen tudnak olyan tokent generálni, amit a szolgáltatás érvényesnek ítélne.
@@ -74,11 +79,19 @@ A mikroszolgáltatások összefogása érdekében készítettem egy webes felhas
 
 ### Felhasználói felület
 A UI tervezése során arra törekedtem, hogy egy letisztult, modern felültet biztosítson a rendszer, melynek használata kényelmes a felhasználók számára. Ennek érdekében merítettem ötleteket több már piacon lévő projektmenedzser alkalmazásból, mint például a *Trello* vagy a *Jira*. Így amellett döntöttem, hogy a projekteken belüli feladatok állapotának vizualizálásához egy kanban táblát fogok használni.
-![Frontend kanban](resources/frontend_kanban.png)
+
+<p align="center">
+<img src="resources/frontend_kanban.png" alt="Frontend kanban"/>
+</p>
+
 A tábla elkészítése mellett megoldottam, hogy az egyes elemeket *Drag&Drop* módon át lehessen rakni egyik oszlopból a másikba. Annyi megkötés van jelenleg a táblára vonatkozóan, hogy nem lehet más oszlopokat felvenni, hanem a feladatokat fixen 3 csoportba lehet sorolni. Vagyis vannak az elvégzendő, a folyamatban lévő és a befejezett feladatok.
 
 A felhasználóknak természetesen lehetőségük van böngészni a projektjeik között, ehhez nyújt segítséget a projekteket listázó komponens.
-![Projekt lista](resources/project_list.png)
+
+<p align="center">
+<img src="resources/project_list.png" alt="Projekt lista"/>
+</p>
+
 Ezen a felületen van lehetősége a projektgazdáknak szerkeszteni az egyes projekteket. Módosíthatják a projektek nevét, és hozzárendelt felhasználók listáját. Továbbá törölhetik is a projekteket, ha arra már nincs szükség. Természetesen ez csak a projektgazdákra igaz, a többi felhasználónak ehhez nincs jogosultsága.
 
 ### Adatok lekérdezése
@@ -87,7 +100,9 @@ Ezen a felületen van lehetősége a projektgazdáknak szerkeszteni az egyes pro
 - dispatcher
 - store.
 
-<center><img src="resources/flux_flow.png" alt="Flux ábra"/></center>
+<p align="center">
+<img src="resources/flux_flow.png" alt="Flux ábra"/>
+</p>
 
 Az **action** komponens feladata, hogy kezelje a *React* komponensekben bekövetkező eseményeket. Én a projektben több **action** komponenst is létrehoztam, melyeket az egyes szolgáltatások alapján neveztem el. Ebből következik, hogy ezek feladata az adatok lekérése az egyes szolgáltatásoktól, továbbá a módosító események továbbítása. A backenddel való kommunikációhoz az *Axios* csomagot használtam, mely lehetővé teszi az aszinkron kérések küldését a *Javascript Promise API*-ja segítségével. A lekérés eredményét ennek megfelelően egy *Promise* objektum tartalmazza, mely az ```Active Object``` mintát valósítja meg. Ez a komponens felel a kérés eredményének átalakításáért és továbbításáért a **dispatcher** segítségével. Annak érdekében, hogy a **store** komponensek el tudják dönteni, hogy milyen **action** eredményét kapták meg, **action** konstansokat hoztam létre, és ezeket hozzáadom a **dispatcher** felé továbbított adathoz.
 

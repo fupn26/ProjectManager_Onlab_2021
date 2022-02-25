@@ -1,2 +1,6 @@
 github.com/rabbitmq/amqp091-go v0.0.0-20210609115249-03e0554a59cf h1:EBDKctNpOEfxlZAm2At5rUjmztnfswQr4ljWQXvQ3pM=
 github.com/rabbitmq/amqp091-go v0.0.0-20210609115249-03e0554a59cf/go.mod h1:ogQDLSOACsLPsIq0NpbtiifNZi2YOz0VTJ0kHRghqbM=
+github.com/sendgrid/rest v2.6.8+incompatible h1:GldbsYQ10qackj/IH9DskKhMm5Q10lpMJznaRAj+zOQ=
+github.com/sendgrid/rest v2.6.8+incompatible/go.mod h1:kXX7q3jZtJXK5c5qK83bSGMdV6tsOE70KbHoqJls4lE=
+github.com/sendgrid/sendgrid-go v3.11.0+incompatible h1:qxQFf21EMuIy3TvlEO7JVzwdXEJLaLwVRT4GFBKktic=
+github.com/sendgrid/sendgrid-go v3.11.0+incompatible/go.mod h1:QRQt+LX/NmgVEvmdRw0VT/QgUn499+iza2FnDca9fg8=

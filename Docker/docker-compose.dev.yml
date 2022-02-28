@@ -159,6 +159,8 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
+    networks:
+      - project-network
       
 networks:
   project-network:

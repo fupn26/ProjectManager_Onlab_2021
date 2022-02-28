@@ -9,3 +9,9 @@ spring:
     port: 5672
     username: guest
     password: guest
+
+admin:
+  password: admin
+
+jwt:
+  secret: hello

@@ -41,14 +41,14 @@ namespace ProjectAPI.Controllers
             {
                 Title = projectToCreate.Title,
                 Owner = jwtToken.Subject,
-                Members = new List<string>(),
+                Members = new List<string>() {jwtToken.Subject},
                 Tasks = new List<string>()
             };
 
             try
             {
                 await _repository.Create(project);
-                sendTaskCreatedMessage(project);
+                sendProjectUpdatedMessage(project, ProjectActivityType.CREATED);
             }
             catch (MongoWriteException e)
             {
@@ -108,6 +108,125 @@ namespace ProjectAPI.Controllers
             try
             {
                 await _repository.Update(project);
+                sendProjectUpdatedMessage(project, ProjectActivityType.UPDATED);
+            }
+            catch (MongoWriteException e)
+            {
+                return BadRequest(e.Message);
+            }
+
+            return Ok();
+        }
+
+        [HttpPatch("member")]
+        public async Task<IActionResult> AddMember(AddMemberDto addMemberDto, [FromHeader] string authorization)
+        {
+            if (authorization == null)
+                return BadRequest("Missing authorization header!");
+
+            string token = parseToken(authorization);
+            if (token == null)
+                return BadRequest("Wrong type of authorization header!");
+
+            var jwtToken = new JwtSecurityToken(token);
+
+            var project = await _repository.Get(addMemberDto.ProjectId);
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            if (jwtToken.Subject != project.Owner)
+            {
+                return Forbid("Don't hava the rights to modify!");
+            }
+
+            if (project.Members.Contains(addMemberDto.UserId))
+            {
+                return BadRequest("Given user is member of the project");
+            }
+
+            try
+            {
+                await _repository.AddMember(addMemberDto.ProjectId, addMemberDto.UserId);
+                sendProjectUpdatedMessage(project, ProjectActivityType.MEMBER_ADDED);
+            }
+            catch (MongoWriteException e)
+            {
+                return BadRequest(e.Message);
+            }
+
+            return Ok();
+        }
+
+        [HttpDelete("member")]
+        public async Task<IActionResult> DeleteMember(DeleteMemberDto deleteMemberDto, [FromHeader] string authorization)
+        {
+            if (authorization == null)
+                return BadRequest("Missing authorization header!");
+
+            string token = parseToken(authorization);
+            if (token == null)
+                return BadRequest("Wrong type of authorization header!");
+
+            var jwtToken = new JwtSecurityToken(token);
+
+            var project = await _repository.Get(deleteMemberDto.ProjectId);
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            if (jwtToken.Subject != project.Owner)
+            {
+                return Forbid("Don't hava the rights to modify!");
+            }
+
+            if (deleteMemberDto.UserId == project.Owner)
+            {
+                return Forbid("Owner of the project can't be deleted from members");
+            }
+
+            try
+            {
+                await _repository.DeleteMember(deleteMemberDto.ProjectId, deleteMemberDto.UserId);
+                sendProjectUpdatedMessage(project, ProjectActivityType.MEMBER_DELETED);
+            }
+            catch (MongoWriteException e)
+            {
+                return BadRequest(e.Message);
+            }
+
+            return Ok();
+        }
+
+        [HttpPatch("title")]
+        public async Task<IActionResult> UpdateTitle(UpdateTitleDto updateTitleDto, [FromHeader] string authorization)
+        {
+            if (authorization == null)
+                return BadRequest("Missing authorization header!");
+
+            string token = parseToken(authorization);
+            if (token == null)
+                return BadRequest("Wrong type of authorization header!");
+
+            var jwtToken = new JwtSecurityToken(token);
+
+            var project = await _repository.Get(updateTitleDto.ProjectId);
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            if (jwtToken.Subject != project.Owner)
+            {
+                return Forbid("Don't hava the rights to modify!");
+            }
+
+            try
+            {
+                await _repository.UpdateTitle(updateTitleDto.ProjectId, updateTitleDto.NewTitle);
+                sendProjectUpdatedMessage(project, ProjectActivityType.TITLE_UPDATED);
             }
             catch (MongoWriteException e)
             {
@@ -155,9 +274,9 @@ namespace ProjectAPI.Controllers
                 return parts[1];
         }
 
-        private void sendTaskCreatedMessage(Project projectToSend)
+        private void sendProjectUpdatedMessage(Project projectToSend, ProjectActivityType activityType)
         {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
+            var factory = new ConnectionFactory() { HostName = "project_rabbit", Port = 5672, UserName = "guest", Password = "guest"};
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
@@ -167,7 +286,7 @@ namespace ProjectAPI.Controllers
                                      autoDelete: false,
                                      arguments: null);
 
-                string message = JsonConvert.SerializeObject(projectToSend);
+                string message = JsonConvert.SerializeObject(mapToProjectUpdatedDto(projectToSend, activityType));
                 var body = Encoding.UTF8.GetBytes(message);
 
                 channel.BasicPublish(exchange: "",
@@ -176,6 +295,17 @@ namespace ProjectAPI.Controllers
                                      body: body);
                 Console.WriteLine(" [x] Sent {0}", message);
             }
+        }
+
+        private ProjectUpdatedDto mapToProjectUpdatedDto(Project projectToMap, ProjectActivityType activityType)
+        {
+            return new ProjectUpdatedDto
+            {
+                ProjectTitle = projectToMap.Title,
+                UserId = projectToMap.Owner,
+                MemberIds = projectToMap.Members,
+                ActivityType = activityType
+            };
         }
     }
 }

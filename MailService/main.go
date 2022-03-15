@@ -7,9 +7,12 @@ import (
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/sethgrid/pester"
+	"github.com/wagslane/go-rabbitmq"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func failOnError(err error, msg string) {
@@ -95,45 +98,44 @@ func sendEmail(messageJson []byte) {
 	}
 }
 
+var consumerName = "MailService"
+
 func main() {
-	conn, err := amqp.Dial("amqp://" + os.Getenv("RABBIT_USER") + ":" + os.Getenv("RABBIT_PASSWORD") + "@" + os.Getenv("RABBIT_HOST") + ":" + os.Getenv("RABBIT_PORT"))
+	consumer, err := rabbitmq.NewConsumer(
+		"amqp://"+os.Getenv("RABBIT_USER")+":"+os.Getenv("RABBIT_PASSWORD")+"@"+os.Getenv("RABBIT_HOST")+":"+os.Getenv("RABBIT_PORT"),
+		amqp.Config{},
+		rabbitmq.WithConsumerOptionsLogging,
+	)
 	failOnError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
 
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
+	defer consumer.Disconnect()
+	defer consumer.StopConsuming(consumerName, false)
 
-	q, err := ch.QueueDeclare(
-		"hello", // name
-		false,   // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
+	err = consumer.StartConsuming(
+		func(d rabbitmq.Delivery) rabbitmq.Action {
+			log.Printf("consumed: %v", string(d.Body))
+			sendEmail(d.Body)
+			return rabbitmq.Ack
+		},
+		"hello",
+		[]string{"routing_key1", "routing_key2"},
 	)
-	failOnError(err, "Failed to declare a queue")
 
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-	failOnError(err, "Failed to register a consumer")
+	failOnError(err, "Failure during consuming")
 
-	forever := make(chan bool)
+	sigs := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
+
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
-			sendEmail(d.Body)
-		}
+		sig := <-sigs
+		fmt.Println()
+		fmt.Println(sig)
+		done <- true
 	}()
 
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	<-forever
+	fmt.Println("awaiting signal")
+	<-done
+	fmt.Println("stopping consumer")
 }

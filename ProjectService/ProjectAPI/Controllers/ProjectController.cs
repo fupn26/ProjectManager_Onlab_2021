@@ -289,9 +289,13 @@ namespace ProjectAPI.Controllers
                 string message = JsonConvert.SerializeObject(mapToProjectUpdatedDto(projectToSend, activityType));
                 var body = Encoding.UTF8.GetBytes(message);
 
-                channel.BasicPublish(exchange: "",
+                IBasicProperties props = channel.CreateBasicProperties();
+                props.Type = "project";
+                props.ContentType = "application/json";
+
+                channel.BasicPublish(exchange: "", 
                                      routingKey: "hello",
-                                     basicProperties: null,
+                                     basicProperties: props,
                                      body: body);
                 Console.WriteLine(" [x] Sent {0}", message);
             }

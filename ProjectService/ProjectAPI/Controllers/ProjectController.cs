@@ -149,7 +149,7 @@ namespace ProjectAPI.Controllers
 
             if (jwtToken.Subject != project.Owner)
             {
-                return Forbid("Don't hava the rights to modify!");
+                return Forbid("Don't have the rights to modify!");
             }
 
             if (project.Members.Contains(addMemberDto.UserId))

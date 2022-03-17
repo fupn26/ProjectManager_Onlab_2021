@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 const consumerName = "MailService"
@@ -54,7 +55,7 @@ func getUserInfos(userIds []string) ([]User, error) {
 	resp, err := client.Get("http://" + os.Getenv("USER_SERVICE_HOST") + ":" + os.Getenv("USER_SERVICE_PORT") + "/api/v1/user")
 
 	if err != nil {
-		log.Println("error GETing example.com", client.LogString())
+		log.Println("error GETing user list", client.LogString())
 	}
 	defer resp.Body.Close()
 	log.Printf("example.com %s", resp.Status)
@@ -125,12 +126,29 @@ func processMessage(messageToProcess rabbitmq.Delivery) {
 }
 
 func main() {
-	consumer, err := rabbitmq.NewConsumer(
-		"amqp://"+os.Getenv("RABBIT_USER")+":"+os.Getenv("RABBIT_PASSWORD")+"@"+os.Getenv("RABBIT_HOST")+":"+os.Getenv("RABBIT_PORT"),
-		amqp.Config{},
-		rabbitmq.WithConsumerOptionsLogging,
-	)
-	failOnError(err, "Failed to connect to RabbitMQ")
+	var consumer rabbitmq.Consumer
+	var err error
+	counter := 0
+	timeToWait := time.Second
+	for {
+		consumer, err = rabbitmq.NewConsumer(
+			"amqp://"+os.Getenv("RABBIT_USER")+":"+os.Getenv("RABBIT_PASSWORD")+"@"+os.Getenv("RABBIT_HOST")+":"+os.Getenv("RABBIT_PORT"),
+			amqp.Config{},
+			rabbitmq.WithConsumerOptionsLogging,
+		)
+		if err != nil {
+			if counter < 5 {
+				time.Sleep(timeToWait)
+				counter += 1
+				timeToWait *= 2
+				log.Println("Waiting for RabbitMQ server...")
+			} else {
+				failOnError(err, "Failed to connect to RabbitMQ")
+			}
+		} else {
+			break
+		}
+	}
 
 	defer consumer.Disconnect()
 	defer consumer.StopConsuming(consumerName, false)

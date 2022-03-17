@@ -27,13 +27,13 @@ services:
       - RabbitMqSettings_Port=${RABBIT_PORT}
       - RabbitMqSettings_Username=${RABBIT_USER}
       - RabbitMqSettings_Password=${RABBIT_PASS}
-
     networks:
       - project-network
     ports:
       - "5002:80" # for accessing Swagger
     depends_on:
       - project_mongo
+      - project_rabbit
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.project.rule=PathPrefix(`/api/v1/project`)"
@@ -96,6 +96,24 @@ services:
       - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`)"
       - "traefik.http.middlewares.comment-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
       - "traefik.http.routers.comment.middlewares=comment-auth@docker"
+
+  mail_service:
+    build:
+      context: ../MailService
+    networks:
+      - project-network
+    depends_on:
+      - project_rabbit
+    environment:
+      - RABBIT_HOST=${RABBIT_HOST}
+      - RABBIT_PORT=${RABBIT_PORT}
+      - RABBIT_USER=${RABBIT_USER}
+      - RABBIT_PASSWORD=${RABBIT_PASS}
+      - USER_SERVICE_HOST=users
+      - USER_SERVICE_PORT=8080
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - SENDGRID_SENDER_NAME=MIcroProject
+      - SENDGRID_SENDER_EMAIL=hifyalorzu@vusra.com
 
   users:
     build: 

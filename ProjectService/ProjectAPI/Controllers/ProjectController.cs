@@ -11,18 +11,28 @@ using System.IdentityModel.Tokens.Jwt;
 using RabbitMQ.Client;
 using Newtonsoft.Json;
 using System.Text;
+using MassTransit;
+using MessagingService;
+using MessagePublisher.DTO;
 
 namespace ProjectAPI.Controllers
 {
+    //public class Message
+    //{
+    //    public string Text { get; set; }
+    //}
+
     [Route("api/v1/project")]
     [ApiController]
     public class ProjectController : ControllerBase
     {
         private readonly IProjectRepository _repository;
+        private readonly IMessagePublisher _messagePublisher;
 
-        public ProjectController(IProjectRepository repository)
+        public ProjectController(IProjectRepository repository, IMessagePublisher messagePublisher)
         {
             _repository = repository;
+            _messagePublisher = messagePublisher;
         }
 
         [HttpPost]
@@ -31,7 +41,7 @@ namespace ProjectAPI.Controllers
             if (authorization == null)
                 return BadRequest("Missing authorization header!");
 
-            string token = parseToken(authorization);
+            string token = ParseToken(authorization);
             if (token == null)
                 return BadRequest("Wrong type of authorization header!");
 
@@ -48,7 +58,8 @@ namespace ProjectAPI.Controllers
             try
             {
                 await _repository.Create(project);
-                sendProjectUpdatedMessage(project, ProjectActivityType.CREATED);
+                //await _messageBus.Send(new Message { Text = "Hello masstransit" });
+                SendProjectUpdatedMessage(project, ProjectActivityType.CREATED);
             }
             catch (MongoWriteException e)
             {
@@ -84,7 +95,7 @@ namespace ProjectAPI.Controllers
             if (authorization == null)
                 return BadRequest("Missing authorization header!");
 
-            string token = parseToken(authorization);
+            string token = ParseToken(authorization);
             if (token == null)
                 return BadRequest("Wrong type of authorization header!");
 
@@ -108,7 +119,7 @@ namespace ProjectAPI.Controllers
             try
             {
                 await _repository.Update(project);
-                sendProjectUpdatedMessage(project, ProjectActivityType.UPDATED);
+                SendProjectUpdatedMessage(project, ProjectActivityType.UPDATED);
             }
             catch (MongoWriteException e)
             {
@@ -124,7 +135,7 @@ namespace ProjectAPI.Controllers
             if (authorization == null)
                 return BadRequest("Missing authorization header!");
 
-            string token = parseToken(authorization);
+            string token = ParseToken(authorization);
             if (token == null)
                 return BadRequest("Wrong type of authorization header!");
 
@@ -149,7 +160,7 @@ namespace ProjectAPI.Controllers
             try
             {
                 await _repository.AddMember(addMemberDto.ProjectId, addMemberDto.UserId);
-                sendProjectUpdatedMessage(project, ProjectActivityType.MEMBER_ADDED);
+                SendProjectUpdatedMessage(project, ProjectActivityType.MEMBER_ADDED);
             }
             catch (MongoWriteException e)
             {
@@ -165,7 +176,7 @@ namespace ProjectAPI.Controllers
             if (authorization == null)
                 return BadRequest("Missing authorization header!");
 
-            string token = parseToken(authorization);
+            string token = ParseToken(authorization);
             if (token == null)
                 return BadRequest("Wrong type of authorization header!");
 
@@ -190,7 +201,7 @@ namespace ProjectAPI.Controllers
             try
             {
                 await _repository.DeleteMember(deleteMemberDto.ProjectId, deleteMemberDto.UserId);
-                sendProjectUpdatedMessage(project, ProjectActivityType.MEMBER_DELETED);
+                SendProjectUpdatedMessage(project, ProjectActivityType.MEMBER_DELETED);
             }
             catch (MongoWriteException e)
             {
@@ -206,7 +217,7 @@ namespace ProjectAPI.Controllers
             if (authorization == null)
                 return BadRequest("Missing authorization header!");
 
-            string token = parseToken(authorization);
+            string token = ParseToken(authorization);
             if (token == null)
                 return BadRequest("Wrong type of authorization header!");
 
@@ -226,7 +237,7 @@ namespace ProjectAPI.Controllers
             try
             {
                 await _repository.UpdateTitle(updateTitleDto.ProjectId, updateTitleDto.NewTitle);
-                sendProjectUpdatedMessage(project, ProjectActivityType.TITLE_UPDATED);
+                SendProjectUpdatedMessage(project, ProjectActivityType.TITLE_UPDATED);
             }
             catch (MongoWriteException e)
             {
@@ -244,7 +255,7 @@ namespace ProjectAPI.Controllers
             if (authorization == null)
                 return BadRequest("Missing authorization header!");
 
-            string token = parseToken(authorization);
+            string token = ParseToken(authorization);
             if (token == null)
                 return BadRequest("Wrong type of authorization header!");
 
@@ -265,7 +276,7 @@ namespace ProjectAPI.Controllers
             return Ok();
         }
 
-        private string parseToken(string authHeader)
+        private string ParseToken(string authHeader)
         {
             string[] parts = authHeader.Split(null);
             if (parts.Length != 2 || parts[0] != "Bearer")
@@ -274,34 +285,36 @@ namespace ProjectAPI.Controllers
                 return parts[1];
         }
 
-        private void sendProjectUpdatedMessage(Project projectToSend, ProjectActivityType activityType)
+        private void SendProjectUpdatedMessage(Project projectToSend, ProjectActivityType activityType)
         {
-            var factory = new ConnectionFactory() { HostName = "project_rabbit", Port = 5672, UserName = "guest", Password = "guest"};
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-                channel.QueueDeclare(queue: "hello",
-                                     durable: false,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
+            IBasicProperties props = _messagePublisher.CreateBasicProperties();
+            props.Type = "project";
+            props.ContentType = "application/json";
 
-                string message = JsonConvert.SerializeObject(mapToProjectUpdatedDto(projectToSend, activityType));
-                var body = Encoding.UTF8.GetBytes(message);
+            _messagePublisher.SendMessage(MapToProjectUpdatedDto(projectToSend, activityType), props);
+            //var factory = new ConnectionFactory() { HostName = "project_rabbit", Port = 5672, UserName = "guest", Password = "guest"};
+            //using (var connection = factory.CreateConnection())
+            //using (var channel = connection.CreateModel())
+            //{
+            //    channel.QueueDeclare(queue: "hello",
+            //                         durable: false,
+            //                         exclusive: false,
+            //                         autoDelete: false,
+            //                         arguments: null);
 
-                IBasicProperties props = channel.CreateBasicProperties();
-                props.Type = "project";
-                props.ContentType = "application/json";
+            //    string message = JsonConvert.SerializeObject(mapToProjectUpdatedDto(projectToSend, activityType));
+            //    var body = Encoding.UTF8.GetBytes(message);
 
-                channel.BasicPublish(exchange: "", 
-                                     routingKey: "hello",
-                                     basicProperties: props,
-                                     body: body);
-                Console.WriteLine(" [x] Sent {0}", message);
-            }
+
+            //    channel.BasicPublish(exchange: "", 
+            //                         routingKey: "hello",
+            //                         basicProperties: props,
+            //                         body: body);
+            //    Console.WriteLine(" [x] Sent {0}", message);
+            //}
         }
 
-        private ProjectUpdatedDto mapToProjectUpdatedDto(Project projectToMap, ProjectActivityType activityType)
+        private ProjectUpdatedDto MapToProjectUpdatedDto(Project projectToMap, ProjectActivityType activityType)
         {
             return new ProjectUpdatedDto
             {

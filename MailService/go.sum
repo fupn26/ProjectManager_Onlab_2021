@@ -1,0 +1,12 @@
+github.com/rabbitmq/amqp091-go v0.0.0-20210609115249-03e0554a59cf h1:EBDKctNpOEfxlZAm2At5rUjmztnfswQr4ljWQXvQ3pM=
+github.com/rabbitmq/amqp091-go v0.0.0-20210609115249-03e0554a59cf/go.mod h1:ogQDLSOACsLPsIq0NpbtiifNZi2YOz0VTJ0kHRghqbM=
+github.com/rabbitmq/amqp091-go v0.0.0-20210823000215-c428a6150891 h1:13nv5f/LNJxNpvpYm/u0NqrlFebon342f9Xu9GpklKc=
+github.com/rabbitmq/amqp091-go v0.0.0-20210823000215-c428a6150891/go.mod h1:ogQDLSOACsLPsIq0NpbtiifNZi2YOz0VTJ0kHRghqbM=
+github.com/sendgrid/rest v2.6.8+incompatible h1:GldbsYQ10qackj/IH9DskKhMm5Q10lpMJznaRAj+zOQ=
+github.com/sendgrid/rest v2.6.8+incompatible/go.mod h1:kXX7q3jZtJXK5c5qK83bSGMdV6tsOE70KbHoqJls4lE=
+github.com/sendgrid/sendgrid-go v3.11.0+incompatible h1:qxQFf21EMuIy3TvlEO7JVzwdXEJLaLwVRT4GFBKktic=
+github.com/sendgrid/sendgrid-go v3.11.0+incompatible/go.mod h1:QRQt+LX/NmgVEvmdRw0VT/QgUn499+iza2FnDca9fg8=
+github.com/sethgrid/pester v1.2.0 h1:adC9RS29rRUef3rIKWPOuP1Jm3/MmB6ke+OhE5giENI=
+github.com/sethgrid/pester v1.2.0/go.mod h1:hEUINb4RqvDxtoCaU0BNT/HV4ig5kfgOasrf1xcvr0A=
+github.com/wagslane/go-rabbitmq v0.7.0 h1:+hA/6oQbJdei2KfDprlDkaqy3fgzRp9IX0pIzICXwao=
+github.com/wagslane/go-rabbitmq v0.7.0/go.mod h1:31ioXpWK5FVuCp7XTYa+kRxxX+RqYoXMJFRC59u35aA=

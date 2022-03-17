@@ -10,6 +10,11 @@ spring:
     url: "jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB}"
     username: ${DB_USER}
     password: ${DB_PASS}
+  rabbitmq:
+    host: ${RABBIT_HOST}
+    port: ${RABBIT_PORT}
+    username: ${RABBIT_USER}
+    password: ${RABBIT_PASS}
 
 admin:
   password: ${ADMIN_PASS}

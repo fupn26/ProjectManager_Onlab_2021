@@ -4,3 +4,14 @@ spring:
       matching-strategy: ant_path_matcher
   jpa:
     show-sql: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+admin:
+  password: admin
+
+jwt:
+  secret: hello

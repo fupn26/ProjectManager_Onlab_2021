@@ -10,7 +10,16 @@ using MongoDAL.Context;
 using MassTransit;
 using MessagingService.Settings;
 using MessagingService;
-
+using Refit;
+using ProjectAPI.WebServices;
+using System;
+using ProjectAPI.Settings;
+using Polly;
+using System.Net.Http;
+using System.Net;
+using ProjectAPI.Controllers.DTO;
+using Newtonsoft.Json;
+using ProjectAPI.WebServices.DTO;
 
 namespace ProjectAPI
 {
@@ -18,6 +27,7 @@ namespace ProjectAPI
     {
         private const string _nameOfDbSettings = "ProjectDbSettings";
         private const string _nameOfRabbitMqSettings = "RabbitMqSettings";
+        private const string _nameOfUserServiceSettings = "UserServiceSettings";
 
         public Startup(IConfiguration configuration)
         {
@@ -44,6 +54,29 @@ namespace ProjectAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProjectAPI", Version = "v1" });
             });
+
+            var userSettings = Configuration.GetSection(_nameOfUserServiceSettings).Get<UserServiceSettings>();
+
+            bool RetryableStatusCodesPredicate(HttpStatusCode statusCode) =>
+                statusCode == HttpStatusCode.BadGateway
+                    || statusCode == HttpStatusCode.ServiceUnavailable
+                    || statusCode == HttpStatusCode.GatewayTimeout;
+
+            var waitAndRetryPolicy = Policy
+                    .Handle<Exception>()
+                    .OrResult<HttpResponseMessage>(msg => RetryableStatusCodesPredicate(msg.StatusCode))
+                    .WaitAndRetryAsync(3, retryCount => TimeSpan.FromSeconds(Math.Pow(2, retryCount)));
+
+            var circuitBreaker = Policy
+                    .Handle<Exception>()
+                    .OrResult<HttpResponseMessage>(msg => RetryableStatusCodesPredicate(msg.StatusCode))
+                    .CircuitBreakerAsync(4, TimeSpan.FromMinutes(1));
+
+            services.AddRefitClient<IUserApi>()
+                .ConfigureHttpClient(c => c.BaseAddress = new Uri(userSettings.BaseUrl))
+                .AddPolicyHandler(Policy
+                    .WrapAsync(waitAndRetryPolicy, circuitBreaker)
+                );
 
             // Alternative for native RabbitMq communication
             //services.AddMassTransit(x =>

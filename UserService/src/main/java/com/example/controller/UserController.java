@@ -64,6 +64,14 @@ public class UserController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<UserDto> getUser(@PathVariable String id) {
+        var user = userRepository.findById(UUID.fromString(id));
+        if (user.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(mapToUserDto(user.get()), HttpStatus.OK);
+    }
+
     private User mapToUser(UserRegisterDto userRegisterDto) {
         return new User(userRegisterDto.getUsername(),
                 userRegisterDto.getEmail(),

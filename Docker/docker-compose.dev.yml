@@ -23,10 +23,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=DockerDev
       - ProjectDbSettings__ConnectionString=mongodb://project_mongo:27017
-      - RabbitMqSettings_Host=${RABBIT_HOST}
-      - RabbitMqSettings_Port=${RABBIT_PORT}
-      - RabbitMqSettings_Username=${RABBIT_USER}
-      - RabbitMqSettings_Password=${RABBIT_PASS}
+      - RabbitMqSettings__Host=${RABBIT_HOST}
+      - RabbitMqSettings__Port=${RABBIT_PORT}
+      - RabbitMqSettings__Username=${RABBIT_USER}
+      - RabbitMqSettings__Password=${RABBIT_PASS}
+      - UserServiceSettings__BaseUrl=http://users:8080
     networks:
       - project-network
     ports:

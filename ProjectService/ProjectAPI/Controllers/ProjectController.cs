@@ -14,6 +14,8 @@ using System.Text;
 using MassTransit;
 using MessagingService;
 using MessagePublisher.DTO;
+using ProjectAPI.WebServices;
+using Refit;
 
 namespace ProjectAPI.Controllers
 {
@@ -28,11 +30,13 @@ namespace ProjectAPI.Controllers
     {
         private readonly IProjectRepository _repository;
         private readonly IMessagePublisher _messagePublisher;
+        private readonly IUserApi _userApi;
 
-        public ProjectController(IProjectRepository repository, IMessagePublisher messagePublisher)
+        public ProjectController(IProjectRepository repository, IMessagePublisher messagePublisher, IUserApi userApi)
         {
             _repository = repository;
             _messagePublisher = messagePublisher;
+            _userApi = userApi;
         }
 
         [HttpPost]
@@ -159,10 +163,27 @@ namespace ProjectAPI.Controllers
 
             try
             {
+                await _userApi.GetUser(addMemberDto.UserId);
+            }
+            catch (ApiException e)
+            {
+                return BadRequest(e.Content);
+            }
+            catch (Exception)
+            {
+                return NotFound("We experiencing problems with user service. Please try it again later!");
+            }
+
+            try
+            {
                 await _repository.AddMember(addMemberDto.ProjectId, addMemberDto.UserId);
                 SendProjectUpdatedMessage(project, ProjectActivityType.MEMBER_ADDED);
             }
-            catch (MongoWriteException e)
+            catch (ApiException e)
+            {
+                return BadRequest(e.Content);
+            }
+            catch (Exception e)
             {
                 return BadRequest(e.Message);
             }

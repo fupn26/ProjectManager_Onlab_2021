@@ -1,9 +1,11 @@
 import React from "react";
-import Calendar from 'react-awesome-calendar';
+//import Calendar from 'react-awesome-calendar';
 import sessionStore from "../../store/SessionStore";
 import dispatcher from "../../dispatcher/Dispatcher";
 import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";
 import {Redirect} from "react-router-dom";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from '@fullcalendar/daygrid';
 
 class EventCalendar extends React.Component {
     constructor(props) {
@@ -48,7 +50,10 @@ class EventCalendar extends React.Component {
                 {
                     !this.state.isUserLoggedIn && <Redirect to={"/login"}/>
                 }
-                <Calendar/>
+                <FullCalendar
+                    plugins={[ dayGridPlugin ]}
+                    initialView="dayGridMonth"
+                />
             </div>
         );
     }

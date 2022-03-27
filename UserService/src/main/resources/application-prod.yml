@@ -4,12 +4,20 @@ spring:
       matching-strategy: ant_path_matcher
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        temp:
+          use_jdbc_metadata_defaults: false
   datasource:
     url: "jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB}"
     username: ${DB_USER}
     password: ${DB_PASS}
+    hikari:
+      minimum-idle: 0
+      initialization-fail-timeout: -1
   rabbitmq:
     host: ${RABBIT_HOST}
     port: ${RABBIT_PORT}

@@ -8,6 +8,7 @@
     {
       "name": "jwt.secret",
       "type": "java.lang.String",
-      "description": "Description for jwt.secret."
+      "description": "A string which is used as secret during JWT generation."
     }
-  ] }
+  ]
+}

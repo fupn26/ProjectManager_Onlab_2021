@@ -7,6 +7,7 @@ import com.example.controller.dto.CredentialDto;
 import com.example.entity.User;
 import com.example.repository.UserRepository;
 import com.example.service.JwtTokenUtil;
+import com.example.service.UserDbInitializer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,7 @@ public class UserController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
+    private final UserDbInitializer dbInitializer;
 
     @PostMapping("/register")
     public ResponseEntity<UserDto> registerUser(@RequestBody UserRegisterDto userRegisterDto) {
@@ -39,6 +41,7 @@ public class UserController {
 
     @GetMapping("/auth")
     public void authUser(@RequestHeader(value = "Authorization") String credentials) {
+        dbInitializer.initDb(); // init db if it is not initialized already
         Optional<String> token = jwtTokenUtil.getTokenFromHeader(credentials);
         if (token.isEmpty() || !jwtTokenUtil.isValidToken(token.get())
                 || !userRepository.existsById(UUID.fromString(jwtTokenUtil.getUserId(token.get()))))
@@ -47,6 +50,7 @@ public class UserController {
 
     @PutMapping("/signin")
     public ResponseEntity<JwtDto> signIn(@RequestBody CredentialDto credentialDto) {
+        dbInitializer.initDb(); // init db if it is not initialized already
         var user = userRepository.findUserByUsername(credentialDto.getUsername());
         if (user != null && credentialDto.getPassword() != null
                 && passwordEncoder.matches(credentialDto.getPassword(), user.getPassword())) {
@@ -59,6 +63,7 @@ public class UserController {
 
     @GetMapping
     public List<UserDto> getUsers() {
+        dbInitializer.initDb(); // init db if it is not initialized already
         return userRepository.findAll().stream()
                 .map(this::mapToUserDto)
                 .collect(Collectors.toList());
@@ -66,6 +71,7 @@ public class UserController {
 
     @GetMapping("{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable String id) {
+        dbInitializer.initDb(); // init db if it is not initialized already
         var user = userRepository.findById(UUID.fromString(id));
         if (user.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

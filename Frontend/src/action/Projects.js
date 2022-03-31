@@ -1,15 +1,7 @@
 import axios from 'axios';
 import dispatcher from '../dispatcher/Dispatcher';
 import * as actionConstants from '../dispatcher/ProjectActionConstants';
-import winston from 'winston';
-
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.simple(),
-    transports: [
-        new winston.transports.Console()
-    ]
-});
+import logger from "../logger/Logger";
 
 const _recordProject = ({title}) => {
     axios.post('/api/v1/project', {title: title}, {

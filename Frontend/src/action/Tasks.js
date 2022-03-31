@@ -1,15 +1,7 @@
 import axios from 'axios';
 import dispatcher from '../dispatcher/Dispatcher';
-import winston from 'winston';
 import {addTask, changeTaskStatus, refreshTasks} from "../dispatcher/TaskActionConstants";
-
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.simple(),
-    transports: [
-        new winston.transports.Console()
-    ]
-});
+import logger from "../logger/Logger";
 
 export function createTask(projectId, title, description) {
     axios.post('/api/v1/todo', {

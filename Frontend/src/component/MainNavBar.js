@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import {useHistory} from "react-router-dom";
 import dispatcher from "../dispatcher/Dispatcher";
 import {logoutSuccess} from "../dispatcher/SessionActionConstants";
-import sessionStore from "../store/SessionStore";
+import sessionStore from "../store/impl/SessionStore";
 
 const MainNavBar = () => {
     const history = useHistory();

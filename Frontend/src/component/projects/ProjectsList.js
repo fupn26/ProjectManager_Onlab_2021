@@ -1,11 +1,11 @@
 import React from 'react';
-import projectStore from '../../store/ProjectStore';
-import projectChangedStore from '../../store/ProjectChangeStore';
-import userStore from '../../store/UserStore';
+import projectStore from '../../store/impl/ProjectStore';
+import projectChangedStore from '../../store/impl/ProjectChangeStore';
+import userStore from '../../store/impl/UserStore';
 import * as actions from '../../action/Projects';
 import {Redirect} from "react-router-dom";
 import {Container} from "react-bootstrap";
-import sessionStore from "../../store/SessionStore";
+import sessionStore from "../../store/impl/SessionStore";
 import dispatcher from "../../dispatcher/Dispatcher";
 import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";
 import {getUsers} from "../../action/Users";

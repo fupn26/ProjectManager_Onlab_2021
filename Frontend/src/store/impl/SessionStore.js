@@ -1,24 +1,12 @@
-import {EventEmitter} from "events";
-import dispatcher from "../dispatcher/Dispatcher";
-import * as actions from "../dispatcher/SessionActionConstants";
+import dispatcher from "../../dispatcher/Dispatcher";
+import * as actions from "../../dispatcher/SessionActionConstants";
+import BaseStore from "../BaseStore";
 
-class SessionStore extends EventEmitter {
+class SessionStore extends BaseStore {
     _isUserLoggedIn = localStorage.getItem("token") != null;
     _isLoginError = false;
     _redirectToOnSuccess = "/projects";
     _registerError = false;
-
-    emitChange(){
-        this.emit('Change');
-    }
-
-    addChangeListener(callback){
-        this.addListener('Change',callback);
-    }
-
-    removeChangeListener(callback){
-        this.removeListener('Change',callback);
-    }
 }
 
 const store = new SessionStore();

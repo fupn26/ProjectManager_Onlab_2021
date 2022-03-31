@@ -2,7 +2,7 @@ import {Button, Container, Form, Stack} from "react-bootstrap";
 import React from "react";
 import {Redirect} from "react-router-dom";
 import {createTask} from "../../action/Tasks";
-import sessionStore from "../../store/SessionStore";
+import sessionStore from "../../store/impl/SessionStore";
 import dispatcher from "../../dispatcher/Dispatcher";
 import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";
 import PropTypes from "prop-types";

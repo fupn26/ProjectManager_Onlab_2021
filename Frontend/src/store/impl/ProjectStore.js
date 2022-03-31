@@ -1,23 +1,10 @@
-import {EventEmitter} from 'events';
-import dispatcher from "../dispatcher/Dispatcher";
-import * as actions from '../dispatcher/ProjectActionConstants';
+import dispatcher from "../../dispatcher/Dispatcher";
+import * as actions from '../../dispatcher/ProjectActionConstants';
+import BaseStore from "../BaseStore";
 
-class ProjectStore extends EventEmitter{
-
+class ProjectStore extends BaseStore{
     _projects = [];
     _currentProject = null;
-
-    emitChange(){
-        this.emit('Change');
-    }
-
-    addChangeListener(callback){
-        this.addListener('Change',callback);
-    }
-
-    removeChangeListener(callback){
-        this.removeListener('Change',callback);
-    }
 }
 
 const store = new ProjectStore();

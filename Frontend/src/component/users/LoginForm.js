@@ -1,7 +1,7 @@
 import {Alert, Button, FormControl, FormLabel} from "react-bootstrap";
 import React from "react";
 import {signIn} from "../../action/Users";
-import sessionStore from "../../store/SessionStore";
+import sessionStore from "../../store/impl/SessionStore";
 import {Redirect} from "react-router-dom";
 
 class LoginForm extends React.Component {

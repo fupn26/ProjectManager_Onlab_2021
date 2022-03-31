@@ -1,5 +1,5 @@
 import React from 'react';
-import sessionStore from '../../store/SessionStore';
+import sessionStore from '../../store/impl/SessionStore';
 import {Redirect} from "react-router-dom";
 import dispatcher from "../../dispatcher/Dispatcher";
 import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";

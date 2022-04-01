@@ -19,8 +19,11 @@ class EventCalendar extends React.Component {
 
         this.state = {
             isUserLoggedIn: sessionStore._isUserLoggedIn,
+            startDate: '',
+            endDate: '',
             showModal: false,
-            meetings: null
+            meetings: null,
+            selectedMeeting: null
         };
         this._updateSessionState = this._updateSessionState.bind(this);
         this._updateMeetingState = this._updateMeetingState.bind(this);
@@ -70,7 +73,9 @@ class EventCalendar extends React.Component {
         logger.info(`Selection start: ${info.startStr}`);
         logger.info(`Selection end: ${info.endStr}`);
         this.setState({
-            show: true
+            show: true,
+            startDate: info.startStr,
+            endDate: info.endStr
         });
     }
 
@@ -95,11 +100,13 @@ class EventCalendar extends React.Component {
     }
 
     render() {
+        logger.info(`User logged in: ${this.state.isUserLoggedIn}`);
+        if (!this.state.isUserLoggedIn)
+            return (
+                <Redirect to={"/login"}/>
+            );
         return (
             <div>
-                {
-                    !this.state.isUserLoggedIn && <Redirect to={"/login"}/>
-                }
                 <FullCalendar
                     plugins={[ dayGridPlugin, timeGridPlugin, interactionPlugin ]}
                     initialView='timeGridDay'
@@ -113,7 +120,8 @@ class EventCalendar extends React.Component {
                     events={this.state.meetings == null ? [] : this.state.meetings.map(this._mapToCalendarEvent)}
                     eventClick={this._onEventClicked}
                 />
-                <EventEditorModal show={this.state.show} onClose={this._onModalClosed}/>
+                <EventEditorModal show={this.state.show} startDate={this.state.startDate}
+                                  endDate={this.state.endDate} onClose={this._onModalClosed}/>
             </div>
         );
     }

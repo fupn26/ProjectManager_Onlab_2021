@@ -15,7 +15,8 @@ class EventEditorModal extends React.Component {
                     <ModalHeader>
                         <ModalTitle>{this.props.edit ? 'Edit event' : 'Create event'}</ModalTitle>
                     </ModalHeader>
-                    <ModalBody/>
+                    <ModalBody>
+                    </ModalBody>
                     <ModalFooter>
                         <Button variant="secondary" onClick={this.props.onClose}>
                             Close

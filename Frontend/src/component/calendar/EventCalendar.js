@@ -1,6 +1,7 @@
 import React from "react";
 //import Calendar from 'react-awesome-calendar';
 import sessionStore from "../../store/impl/SessionStore";
+import meetingStore from "../../store/impl/MeetingStore";
 import dispatcher from "../../dispatcher/Dispatcher";
 import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";
 import {Redirect} from "react-router-dom";
@@ -9,6 +10,8 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import EventEditorModal from "./EventEditorModal";
+import {getMeetings} from "../../action/Meeting";
+import logger from "../../logger/Logger";
 
 class EventCalendar extends React.Component {
     constructor(props) {
@@ -16,20 +19,26 @@ class EventCalendar extends React.Component {
 
         this.state = {
             isUserLoggedIn: sessionStore._isUserLoggedIn,
-            showModal: false
+            showModal: false,
+            meetings: null
         };
         this._updateSessionState = this._updateSessionState.bind(this);
+        this._updateMeetingState = this._updateMeetingState.bind(this);
         this._onTimeSelected = this._onTimeSelected.bind(this);
         this._onModalClosed = this._onModalClosed.bind(this);
     }
 
     componentDidMount() {
         sessionStore.addChangeListener(this._updateSessionState);
+        meetingStore.addChangeListener(this._updateMeetingState);
         if (!this.state.isUserLoggedIn)
             dispatcher.dispatch({
                 action: changeRedirectUri,
                 payload: "/calendar"
             });
+        else {
+            getMeetings();
+        }
     }
 
     componentDidUpdate() {
@@ -42,6 +51,7 @@ class EventCalendar extends React.Component {
 
     componentWillUnmount() {
         sessionStore.removeChangeListener(this._updateSessionState);
+        sessionStore.removeChangeListener(this._updateMeetingState);
     }
 
     _updateSessionState() {
@@ -50,26 +60,38 @@ class EventCalendar extends React.Component {
         });
     }
 
-    _onDateClicked(info) {
-        alert('Clicked on: ' + info.dateStr);
-        alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
-        alert('Current view: ' + info.view.type);
-        // change the day's background color just for fun
-        info.dayEl.style.backgroundColor = 'red';
+    _updateMeetingState() {
+        this.setState({
+            meetings: meetingStore._meetings
+        });
     }
 
     _onTimeSelected(info) {
-        alert(`Selection start: ${info.startStr}`);
-        alert(`Selection end: ${info.endStr}`);
+        logger.info(`Selection start: ${info.startStr}`);
+        logger.info(`Selection end: ${info.endStr}`);
         this.setState({
             show: true
         });
+    }
+
+    _onEventClicked(info) {
+        logger.info(info);
+        //TODO: handle event clicking correctly
     }
 
     _onModalClosed() {
         this.setState({
             show: false
         });
+    }
+
+    _mapToCalendarEvent(meeting) {
+        return {
+            id: meeting.id,
+            title: meeting.theme,
+            start: meeting.startTime,
+            end: meeting.endTime
+        };
     }
 
     render() {
@@ -80,7 +102,7 @@ class EventCalendar extends React.Component {
                 }
                 <FullCalendar
                     plugins={[ dayGridPlugin, timeGridPlugin, interactionPlugin ]}
-                    initialView="timeGridDay"
+                    initialView='timeGridDay'
                     headerToolbar={{
                         start: 'prev,next',
                         center: 'title',
@@ -88,6 +110,8 @@ class EventCalendar extends React.Component {
                     }}
                     selectable={true}
                     select={this._onTimeSelected}
+                    events={this.state.meetings == null ? [] : this.state.meetings.map(this._mapToCalendarEvent)}
+                    eventClick={this._onEventClicked}
                 />
                 <EventEditorModal show={this.state.show} onClose={this._onModalClosed}/>
             </div>

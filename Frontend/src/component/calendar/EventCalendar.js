@@ -12,6 +12,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import EventEditorModal from "./EventEditorModal";
 import {getMeetings} from "../../action/Meeting";
 import logger from "../../logger/Logger";
+import EventInfoModal from "./EventInfoModal";
 
 class EventCalendar extends React.Component {
     constructor(props) {
@@ -21,14 +22,18 @@ class EventCalendar extends React.Component {
             isUserLoggedIn: sessionStore._isUserLoggedIn,
             startDate: '',
             endDate: '',
-            showModal: false,
-            meetings: null,
+            showEditorModal: false,
+            showInfoModal: false,
+            meetings: [],
             selectedMeeting: null
         };
         this._updateSessionState = this._updateSessionState.bind(this);
         this._updateMeetingState = this._updateMeetingState.bind(this);
         this._onTimeSelected = this._onTimeSelected.bind(this);
-        this._onModalClosed = this._onModalClosed.bind(this);
+        this._onInfoModalClosed = this._onInfoModalClosed.bind(this);
+        this._onEditorModalClosed = this._onEditorModalClosed.bind(this);
+        this._onEventClicked = this._onEventClicked.bind(this);
+        this._onEditRequested = this._onEditRequested.bind(this);
     }
 
     componentDidMount() {
@@ -73,20 +78,43 @@ class EventCalendar extends React.Component {
         logger.info(`Selection start: ${info.startStr}`);
         logger.info(`Selection end: ${info.endStr}`);
         this.setState({
-            show: true,
+            showEditorModal: true,
             startDate: info.startStr,
             endDate: info.endStr
         });
     }
 
     _onEventClicked(info) {
-        logger.info(info);
+        logger.info(JSON.stringify(info.event));
         //TODO: handle event clicking correctly
+        logger.info(JSON.stringify(this.state.meetings));
+        const meeting = this.state.meetings.find(meeting => meeting.id === info.event.id);
+        if (meeting != null) {
+            meeting.startTime = info.event.startStr;
+            meeting.endTime = info.event.endStr;
+            this.setState({
+                showInfoModal: true,
+                selectedMeeting: meeting
+            });
+        }
     }
 
-    _onModalClosed() {
+    _onInfoModalClosed() {
         this.setState({
-            show: false
+            showInfoModal: false,
+        });
+    }
+
+    _onEditorModalClosed() {
+        this.setState({
+            showEditorModal: false,
+        });
+    }
+
+    _onEditRequested() {
+        this._onInfoModalClosed();
+        this.setState({
+            showEditorModal: true
         });
     }
 
@@ -120,8 +148,10 @@ class EventCalendar extends React.Component {
                     events={this.state.meetings == null ? [] : this.state.meetings.map(this._mapToCalendarEvent)}
                     eventClick={this._onEventClicked}
                 />
-                <EventEditorModal show={this.state.show} startDate={this.state.startDate}
-                                  endDate={this.state.endDate} onClose={this._onModalClosed}/>
+                <EventEditorModal show={this.state.showEditorModal} startDate={this.state.startDate}
+                                  endDate={this.state.endDate} meeting={this.state.selectedMeeting} onClose={this._onEditorModalClosed}/>
+                <EventInfoModal show={this.state.showInfoModal} meeting={this.state.selectedMeeting}
+                                onEdit={this._onEditRequested} onClose={this._onInfoModalClosed}/>
             </div>
         );
     }

@@ -1,9 +1,9 @@
 import axios from "axios";
 import logger from "../logger/Logger";
 import dispatcher from "../dispatcher/Dispatcher";
-import {meetingCreated, meetingDeleted, meetingListArrived} from "../dispatcher/MeetingActionConstants";
+import {meetingCreated, meetingDeleted, meetingListArrived, meetingUpdated} from "../dispatcher/MeetingActionConstants";
 
-export function createMeeting({projectId, theme, startTime, endTime, place, participants}) {
+export function createMeeting({projectId, theme, startTime, endTime, place, participants, notes}) {
     logger.info('Creating meeting...');
     const dataToSend = {
         projectId: projectId,
@@ -11,7 +11,8 @@ export function createMeeting({projectId, theme, startTime, endTime, place, part
         startTime: startTime,
         endTime: endTime,
         place: place,
-        participants: participants
+        participants: participants,
+        notes: notes
     };
 
     axios.post('/api/v1/meeting', dataToSend, {
@@ -23,6 +24,32 @@ export function createMeeting({projectId, theme, startTime, endTime, place, part
         payload: response.data
     }))
         .catch(error => logger.error(error));
+}
+
+export function updateMeeting(meetingId, {projectId, theme, startTime, endTime, place, participants, notes}) {
+    logger.info('Updating meeting...');
+    const dataToSend = {
+        projectId: projectId,
+        theme: theme,
+        startTime: startTime,
+        endTime: endTime,
+        place: place,
+        participants: participants,
+        notes: notes
+    };
+
+    axios.put(`/api/v1/meeting/${meetingId}`, dataToSend, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+    }).then(() => dispatcher.dispatch({
+        action: meetingUpdated,
+        payload: {
+            ...dataToSend,
+            id: meetingId
+        }
+    }))
+        .catch(error => logger.log(error));
 }
 
 export function getMeetings() {

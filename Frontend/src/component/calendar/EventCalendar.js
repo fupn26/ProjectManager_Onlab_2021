@@ -102,19 +102,24 @@ class EventCalendar extends React.Component {
     _onInfoModalClosed() {
         this.setState({
             showInfoModal: false,
+            selectedMeeting: null
         });
     }
 
     _onEditorModalClosed() {
         this.setState({
             showEditorModal: false,
+            selectedMeeting: null
         });
     }
 
     _onEditRequested() {
-        this._onInfoModalClosed();
+        logger.info(JSON.stringify(this.state.selectedMeeting));
         this.setState({
-            showEditorModal: true
+            startDate: this.state.selectedMeeting.startTime,
+            endDate: this.state.selectedMeeting.endTime,
+            showEditorModal: true,
+            showInfoModal: false
         });
     }
 

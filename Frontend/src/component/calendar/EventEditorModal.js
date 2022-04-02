@@ -1,12 +1,12 @@
 import {
-    Button,
+    Button, Container,
     Form,
     FormControl,
     FormLabel, FormSelect,
     Modal,
     ModalBody,
     ModalFooter,
-    ModalTitle,
+    ModalTitle, Row,
 } from "react-bootstrap";
 import ModalHeader from "react-bootstrap/ModalHeader";
 import React from "react";
@@ -18,19 +18,18 @@ import {getUsers} from "../../action/Users";
 import {fetchAllProjects} from "../../action/Projects";
 import projectStore from "../../store/impl/ProjectStore";
 import logger from "../../logger/Logger";
-import {createMeeting} from "../../action/Meeting";
+import {createMeeting, updateMeeting} from "../../action/Meeting";
 
 class EventEditorModal extends React.Component {
     constructor(props) {
         super(props);
+        logger.info('Passed meeting:' + props.meeting);
         this.state = {
-            edit: props.meeting !== undefined,
             users: [],
             projects: [],
             optionPlaceholderText: 'Select project...',
             isProjectSelected: false,
             selectedProject: null,
-            meeting: props.meeting,
             memberList: []
         };
         this._onUserListUpdated = this._onUserListUpdated.bind(this);
@@ -41,6 +40,11 @@ class EventEditorModal extends React.Component {
         this._mapToUserWithNameId = this._mapToUserWithNameId.bind(this);
         this._onMemberAddedToMeeting = this._onMemberAddedToMeeting.bind(this);
         this._onMemberDeletedToMeeting = this._onMemberDeletedToMeeting.bind(this);
+        this._getMeetingTitle = this._getMeetingTitle.bind(this);
+        this._getMeetingPlace = this._getMeetingPlace.bind(this);
+        this._getMeetingNotes = this._getMeetingNotes.bind(this);
+        this._isEditing = this._isEditing.bind(this);
+        this._onShow = this._onShow.bind(this);
     }
 
     componentDidMount() {
@@ -82,9 +86,13 @@ class EventEditorModal extends React.Component {
             startTime: document.getElementById('start_date_input').value + timeZoneOffset,
             endTime: document.getElementById('end_date_input').value + timeZoneOffset,
             place: document.getElementById('place_input').value,
-            participants: [...this.state.memberList, jwtDecode(localStorage.getItem("token")).sub]
+            participants: [...this.state.memberList, jwtDecode(localStorage.getItem("token")).sub],
+            notes: this._isEditing() ? document.getElementById('notes_input').value : ''
         };
-        createMeeting(meetingToSave);
+        if (this._isEditing())
+            updateMeeting(this.props.meeting.id, meetingToSave);
+        else
+            createMeeting(meetingToSave);
         this.props.onClose();
     }
 
@@ -98,6 +106,7 @@ class EventEditorModal extends React.Component {
     }
 
     _onProjectSelectChanged(event) {
+        logger.info('Project selection changed...');
         const project = this.state.projects.find(project => project.id === event.target.value);
         if (project !== undefined) {
             this.setState({
@@ -148,17 +157,52 @@ class EventEditorModal extends React.Component {
         return dateStr.slice(19);
     }
 
+    _getMeetingTitle() {
+        if (this._isEditing())
+            return this.props.meeting.theme;
+        else
+            return '';
+    }
+
+    _getMeetingPlace() {
+        if (this._isEditing())
+            return this.props.meeting.place;
+        else
+            return '';
+    }
+
+    _getMeetingNotes() {
+        if (this._isEditing())
+            return this.props.meeting.notes;
+        else
+            return '';
+    }
+
+    _isEditing() {
+        return this.props.meeting != null;
+    }
+
+    _onShow() {
+        if (this._isEditing()) {
+            const select = document.getElementById('project_select_input');
+            select.value = this.props.meeting.projectId;
+            this._onProjectSelectChanged({
+                target: select
+            });
+        }
+    }
+
     render() {
         return (
             <>
-                <Modal show={this.props.show}>
+                <Modal show={this.props.show} onShow={this._onShow}>
                     <ModalHeader>
-                        <ModalTitle>{this.state.edit ? 'Edit event' : 'Create event'}</ModalTitle>
+                        <ModalTitle>{this._isEditing() ? 'Edit event' : 'Create event'}</ModalTitle>
                     </ModalHeader>
                     <ModalBody>
                         <Form>
                             <FormLabel>Title:</FormLabel>
-                            <FormControl id={'title_input'} type='text'/>
+                            <FormControl id={'title_input'} type='text' defaultValue={this._getMeetingTitle()}/>
                             <FormLabel>From:</FormLabel>
                             <FormControl id={'start_date_input'} type='datetime-local'
                                          defaultValue={this._mapToLocaleString(this.props.startDate)}/>
@@ -166,9 +210,9 @@ class EventEditorModal extends React.Component {
                             <FormControl id={'end_date_input'} type='datetime-local'
                                          defaultValue={this._mapToLocaleString(this.props.endDate)}/>
                             <FormLabel>Place:</FormLabel>
-                            <FormControl id={'place_input'} type='text'/>
+                            <FormControl id={'place_input'} type='text' defaultValue={this._getMeetingPlace()}/>
                             <FormLabel>Select project:</FormLabel>
-                            <FormSelect style={{
+                            <FormSelect id={'project_select_input'} style={{
                                 width: "100%"
                             }} onChange={this._onProjectSelectChanged}>
                                 <option value={this.state.optionPlaceholderText}>{this.state.optionPlaceholderText}</option>
@@ -179,13 +223,28 @@ class EventEditorModal extends React.Component {
                                 }
                             </FormSelect>
                             {
-                                this.state.isProjectSelected && <UserAdd members={this.state.meeting == null ? []
-                                    : this.state.meeting.participants.map(this._mapToUserWithNameId)}
+                                this.state.isProjectSelected && <UserAdd members={this.props.meeting == null ? []
+                                    : this.props.meeting.participants.map(this._mapToUserWithNameId)}
                                                                          users={this.state.users}
                                                                          creator={jwtDecode(localStorage
                                                                              .getItem("token")).sub}
                                                                          onMemberAdded={this._onMemberAddedToMeeting}
                                                                          onMemberDeleted={this._onMemberDeletedToMeeting}/>
+                            }
+                            {
+                                (this._isEditing()) &&
+                                <>
+                                    <Container>
+                                        <Row>
+                                            <FormLabel>Notes:</FormLabel>
+                                        </Row>
+                                        <Row style={{
+                                            width: "100%"
+                                        }}>
+                                            <textarea id={'notes_input'} defaultValue={this._getMeetingNotes()}/>
+                                        </Row>
+                                    </Container>
+                                </>
                             }
                         </Form>
                     </ModalBody>

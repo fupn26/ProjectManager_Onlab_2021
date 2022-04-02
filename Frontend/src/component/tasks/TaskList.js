@@ -2,7 +2,7 @@
 import React from "react";
 import {Redirect} from "react-router-dom";
 import PropTypes from "prop-types";
-import {changeStatus, getTasks} from "../../action/Tasks";
+import {changeStatus, deleteTask, getTasks} from "../../action/Tasks";
 import taskStore from "../../store/impl/TaskStore";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 import {Button, Card} from "react-bootstrap";
@@ -60,10 +60,11 @@ class TaskList extends React.Component {
     }
 
     _getAllTaskFromStore = () => {
-        if (this.state.tasks === taskStore._tasks)
-            getTasks(this.props.projectid);
-        else
-            this.setState({tasks: taskStore._tasks});
+        this.setState({tasks: taskStore._tasks});
+    }
+
+    _onDeleteButtonClicked = (taskId) => {
+        deleteTask(taskId);
     }
 
     render() {
@@ -101,6 +102,11 @@ class TaskList extends React.Component {
                                                             >
                                                                 <Card.Header>{item.title}</Card.Header>
                                                                 <Card.Body>{item.description}</Card.Body>
+                                                                <Card.Footer>
+                                                                    <Button variant={'danger'} onClick={() =>
+                                                                        this._onDeleteButtonClicked(item.id)}>Delete</Button>
+                                                                    <Button variant={'primary'}>Details</Button>
+                                                                </Card.Footer>
                                                             </div>
                                                         )}
                                                     </Draggable>

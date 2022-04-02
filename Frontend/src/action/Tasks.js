@@ -3,11 +3,12 @@ import dispatcher from '../dispatcher/Dispatcher';
 import {addTask, changeTaskStatus, refreshTasks, removeTask} from "../dispatcher/TaskActionConstants";
 import logger from "../logger/Logger";
 
-export function createTask(projectId, title, description) {
+export function createTask(projectId, title, description, assignees) {
     axios.post('/api/v1/todo', {
         projectId: projectId,
         title: title,
-        description: description
+        description: description,
+        assignees: assignees
     }, {
         headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`

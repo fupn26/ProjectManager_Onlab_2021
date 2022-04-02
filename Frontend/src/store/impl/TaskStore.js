@@ -5,8 +5,7 @@ import logger from "../../logger/Logger";
 
 class TaskStore extends BaseStore {
 
-    _tasks = null;
-    _currentTask = [];
+    _tasks = [];
 
     emitChange(){
         this.emit('Change');
@@ -33,7 +32,7 @@ const constantArrayMapping = {
 dispatcher.register(({action,payload})=>{
     if (action === actions.addTask) {
         console.log(`${payload.id} task created`);
-        store._currentTask = payload;
+        store._tasks.push(payload);
         store.emitChange();
     }
     else if (action === actions.refreshTasks) {

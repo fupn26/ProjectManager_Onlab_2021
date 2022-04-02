@@ -6,6 +6,7 @@ import {changeStatus, deleteTask, getTasks} from "../../action/Tasks";
 import taskStore from "../../store/impl/TaskStore";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 import {Button, Card} from "react-bootstrap";
+
 import {doing, doings, done, dones, toDo, toDos} from "../../action/TaskStatusConstants";
 
 class TaskList extends React.Component {
@@ -13,7 +14,9 @@ class TaskList extends React.Component {
         super(props);
         this.state = {
             tasks: null,
-            redirect: false,
+            redirectToRecordForm: false,
+            redirectToTaskDetails: false,
+            selectedTaskId: null,
             columns: [
                 {
                     id: toDos,
@@ -33,7 +36,7 @@ class TaskList extends React.Component {
 
     _onAddClicked = () => {
         console.log("Clicked");
-        this.setState({redirect: true});
+        this.setState({redirectToRecordForm: true});
     }
 
     _onDragEnd = (results) => {
@@ -67,9 +70,18 @@ class TaskList extends React.Component {
         deleteTask(taskId);
     }
 
+    _onDetailsButtonClicked = (taskId) => {
+        this.setState({
+            redirectToTaskDetails: true,
+            selectedTaskId: taskId
+        });
+    }
+
     render() {
-        if (this.state.redirect)
+        if (this.state.redirectToRecordForm)
             return (<Redirect push to={`/tasks/add/${this.props.projectid}`}/>);
+        if (this.state.redirectToTaskDetails)
+            return (<Redirect push to={`/tasks/${this.state.selectedTaskId}`}/>);
         if (this.state.tasks === null) {
             return (<h3>{`Can't load tasks for project ${this.props.projectid}`}</h3>);
         }
@@ -105,7 +117,9 @@ class TaskList extends React.Component {
                                                                 <Card.Footer>
                                                                     <Button variant={'danger'} onClick={() =>
                                                                         this._onDeleteButtonClicked(item.id)}>Delete</Button>
-                                                                    <Button variant={'primary'}>Details</Button>
+                                                                    <Button variant={'primary'} onClick={() =>
+                                                                        this._onDetailsButtonClicked(item.id)
+                                                                    }>Details</Button>
                                                                 </Card.Footer>
                                                             </div>
                                                         )}

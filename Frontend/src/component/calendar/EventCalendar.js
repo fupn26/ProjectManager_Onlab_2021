@@ -86,7 +86,6 @@ class EventCalendar extends React.Component {
 
     _onEventClicked(info) {
         logger.info(JSON.stringify(info.event));
-        //TODO: handle event clicking correctly
         logger.info(JSON.stringify(this.state.meetings));
         const meeting = this.state.meetings.find(meeting => meeting.id === info.event.id);
         if (meeting != null) {
@@ -148,6 +147,7 @@ class EventCalendar extends React.Component {
                         center: 'title',
                         right: 'timeGridDay,timeGridWeek,dayGridMonth'
                     }}
+                    allDaySlot={false}
                     selectable={true}
                     select={this._onTimeSelected}
                     events={this.state.meetings == null ? [] : this.state.meetings.map(this._mapToCalendarEvent)}

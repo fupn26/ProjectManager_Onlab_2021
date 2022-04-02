@@ -2,7 +2,7 @@ import React from 'react';
 import {Alert, Button, FormControl, FormLabel} from "react-bootstrap";
 import {Redirect} from "react-router-dom";
 import {registerUser} from "../../action/Users";
-import sessionStore from "../../store/SessionStore";
+import sessionStore from "../../store/impl/SessionStore";
 
 class RegisterForm extends React.Component {
     constructor(props) {

@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as actions from "../../action/Projects";
-import store from "../../store/ProjectStore";
+import store from "../../store/impl/ProjectStore";
 import TaskList from "../tasks/TaskList";
 import {Container} from "react-bootstrap";
-import sessionStore from "../../store/SessionStore";
+import sessionStore from "../../store/impl/SessionStore";
 import {Redirect} from "react-router-dom";
 import dispatcher from "../../dispatcher/Dispatcher";
 import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";

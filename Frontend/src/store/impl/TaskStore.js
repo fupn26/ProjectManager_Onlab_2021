@@ -1,8 +1,8 @@
-import {EventEmitter} from "events";
-import dispatcher from "../dispatcher/Dispatcher";
-import * as actions from "../dispatcher/TaskActionConstants";
+import dispatcher from "../../dispatcher/Dispatcher";
+import * as actions from "../../dispatcher/TaskActionConstants";
+import BaseStore from "../BaseStore";
 
-class TaskStore extends EventEmitter {
+class TaskStore extends BaseStore {
 
     _tasks = null;
     _currentTask = [];

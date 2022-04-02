@@ -2,15 +2,7 @@ import axios from "axios";
 import {loginFailed, loginSuccess, registerFailed, registerSuccess} from "../dispatcher/SessionActionConstants";
 import dispatcher from "../dispatcher/Dispatcher";
 import {userListArrived} from "../dispatcher/UserActionConstants";
-import winston from "winston";
-
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.simple(),
-    transports: [
-        new winston.transports.Console()
-    ]
-});
+import logger from "../logger/Logger";
 
 export function signIn(username, password) {
     axios.put('/api/v1/user/signin', {

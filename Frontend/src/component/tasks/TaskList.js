@@ -3,7 +3,7 @@ import React from "react";
 import {Redirect} from "react-router-dom";
 import PropTypes from "prop-types";
 import {changeStatus, getTasks} from "../../action/Tasks";
-import taskStore from "../../store/TaskStore";
+import taskStore from "../../store/impl/TaskStore";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 import {Button, Card} from "react-bootstrap";
 import {doing, doings, done, dones, toDo, toDos} from "../../action/TaskStatusConstants";

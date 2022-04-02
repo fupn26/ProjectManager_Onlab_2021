@@ -12,7 +12,7 @@ class UserAdd extends React.Component {
         super(props);
         this.state = {
             members: props.members == null || props.creator == null ? props.members
-                : props.members.filter(member => member.id === props.creator),
+                : props.members.filter(member => member.id !== props.creator),
             optionPlaceholderText: "Select a user to add..."
         };
         logger.info(JSON.stringify(this.state.members));

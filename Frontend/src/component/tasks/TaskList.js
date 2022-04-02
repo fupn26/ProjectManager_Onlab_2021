@@ -54,8 +54,8 @@ class TaskList extends React.Component {
     }
 
     componentDidMount() {
-        getTasks(this.props.projectid);
         taskStore.addChangeListener(this._getAllTaskFromStore);
+        getTasks(this.props.projectid);
     }
 
     componentWillUnmount() {

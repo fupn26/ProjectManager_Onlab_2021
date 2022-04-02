@@ -11,6 +11,11 @@ import sessionStore from "../../store/impl/SessionStore";
 import dispatcher from "../../dispatcher/Dispatcher";
 import {changeRedirectUri} from "../../dispatcher/SessionActionConstants";
 import {Redirect} from "react-router-dom";
+import "react-chat-elements/dist/main.css";
+import {MessageList} from "react-chat-elements";
+import commentStore from "../../store/impl/CommentStore";
+import jwtDecode from "jwt-decode";
+import {createComment, getComments} from "../../action/Comments";
 
 class TaskDetails extends React.Component {
     constructor(props) {
@@ -34,6 +39,7 @@ class TaskDetails extends React.Component {
         userStore.addChangeListener(this._onUserListChanged);
         taskStore.addChangeListener(this._onTaskListChanged);
         projectStore.addChangeListener(this._onProjectListChanged);
+        commentStore.addChangeListener(this._onCommentListChanged);
         if (!this.state.isUserLoggedIn) {
             dispatcher.dispatch({
                 action: changeRedirectUri,
@@ -42,6 +48,7 @@ class TaskDetails extends React.Component {
         } else {
             getUsers();
             getTasks();
+            getComments();
         }
     }
 
@@ -50,6 +57,7 @@ class TaskDetails extends React.Component {
         userStore.removeChangeListener(this._onUserListChanged);
         taskStore.removeChangeListener(this._onTaskListChanged);
         projectStore.removeChangeListener(this._onProjectListChanged);
+        commentStore.removeChangeListener(this._onCommentListChanged);
     }
 
     componentDidUpdate() {
@@ -59,6 +67,12 @@ class TaskDetails extends React.Component {
                 payload: `/tasks/${this.state.taskId}`
             });
         }
+    }
+
+    _onCommentListChanged = () => {
+        this.setState({
+           comments: commentStore._comments
+        });
     }
 
     _onUserListChanged = () => {
@@ -101,6 +115,33 @@ class TaskDetails extends React.Component {
     _updateSessionStateFromStore = () => {
         this.setState({
             isUserLoggedIn: sessionStore._isUserLoggedIn
+        });
+    }
+
+    _mapToMessage = (comment) => {
+        const user = this.state.users.find(user => user.id === comment.user);
+        let title = 'Unknown';
+        if (user != null)
+            title = user.username;
+        let position = 'left';
+        if (jwtDecode(localStorage.getItem("token")).sub === comment.user)
+            position = 'right';
+        console.log(comment);
+        return {
+            position: position,
+            type: 'text',
+            text: comment.content,
+            title: title,
+            date: new Date(comment.creationTime)
+        };
+
+    }
+
+    _onSendComment = () => {
+        const content = document.getElementById('content_input').value;
+        createComment({
+            toDoId: this.state.taskId,
+            content: content
         });
     }
 
@@ -168,18 +209,26 @@ class TaskDetails extends React.Component {
                     height: '100%',
                     backgroundColor: 'black'
                 }}>
-                    <div style={{
-                        height: '95%',
-                        overflowY: 'auto'
-                    }}>
-
-                    </div>
-                    <div style={{
-                        display: "flex"
-                    }}>
-                        <FormControl/>
-                        <Button>Send</Button>
-                    </div>
+                    {
+                        (this.state.task != null) && <>
+                            <div style={{
+                                height: '95%',
+                                overflowY: 'auto',
+                                color: 'black'
+                            }}>
+                                <MessageList
+                                    lockable={true}
+                                    toBottomHeight={'100%'}
+                                    dataSource={this.state.comments.map(this._mapToMessage)}/>
+                            </div>
+                            <div style={{
+                                display: "flex"
+                            }}>
+                                <FormControl id={'content_input'}/>
+                                <Button onClick={this._onSendComment}>Send</Button>
+                            </div>
+                        </>
+                    }
                 </Stack>
             </div>
         );

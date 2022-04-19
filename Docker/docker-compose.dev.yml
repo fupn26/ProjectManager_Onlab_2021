@@ -68,12 +68,14 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=DockerDev
       - ToDoDbSettings__ConnectionString=mongodb://project_mongo:27017
+      - ToDoCacheSettings__ConnectionString=project_redis:6379
     networks:
       - project-network
     ports:
       - "5004:80" # for accessing Swagger
     depends_on:
       - project_mongo
+      - project_redis
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.todo.rule=PathPrefix(`/api/v1/todo`)"
@@ -163,6 +165,13 @@ services:
     image: mongo
     ports:
       - "27017:27017"
+    networks:
+      - project-network
+
+  project_redis:
+    image: redis
+    ports:
+      - "6379:6379"
     networks:
       - project-network
 

@@ -16,6 +16,58 @@ import {MessageList} from "react-chat-elements";
 import commentStore from "../../store/impl/CommentStore";
 import jwtDecode from "jwt-decode";
 import {createComment, getComments} from "../../action/Comments";
+import * as signalR from "@microsoft/signalr";
+import logger from "../../logger/Logger";
+
+class SignalRHub {
+    constructor(token, taskId) {
+        this._hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/commentHub", { accessTokenFactory: () => token})
+            .withAutomaticReconnect()
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+        this._hubConnection.onreconnecting(this._onReconnecting);
+        this._hubConnection.onreconnected(this._onReconnected);
+        this._hubConnection.on("ReceiveMessage", this._onReceiveMessage);
+        this._taskId = taskId;
+        this._startConnection();
+    }
+
+    _taskId = null;
+
+    _onReconnecting = (error) => {
+        logger.error(`Connection lost due to ${error}. Reconnecting...`);
+    }
+
+    _onReconnected = (connectionId) => {
+        logger.info(`Connection established with connection id ${connectionId}`);
+    }
+
+    _onReceiveMessage = () => {
+        logger.info('message received');
+        getComments(this._taskId);
+    }
+
+
+    _startConnection = async () => {
+        try {
+            await this._hubConnection.start();
+            console.assert(this._hubConnection.state === signalR.HubConnectionState.Connected);
+            logger.info("SignalR Connected.");
+        } catch (err) {
+            logger.error('Can\'t connect to SignalR');
+            setTimeout(() => this._startConnection(), 5000);
+        }
+    }
+
+    invoke = async (methodName) => {
+        await this._hubConnection.invoke(methodName);
+    }
+
+    _hubConnection = null
+}
+
+var hubConnection = null;
 
 class TaskDetails extends React.Component {
     constructor(props) {
@@ -30,7 +82,8 @@ class TaskDetails extends React.Component {
             textStyle: {
                 fontWeight: 'bold'
             },
-            isUserLoggedIn: sessionStore._isUserLoggedIn
+            isUserLoggedIn: sessionStore._isUserLoggedIn,
+            isCommentHubConnected: false
         };
     }
 
@@ -48,7 +101,11 @@ class TaskDetails extends React.Component {
         } else {
             getUsers();
             getTasks();
-            getComments();
+            getComments(this.state.taskId);
+            if (hubConnection == null) {
+                hubConnection = new SignalRHub(localStorage.getItem('token'), this.state.taskId);
+            }
+            this._hubConnection = hubConnection;
         }
     }
 
@@ -126,7 +183,6 @@ class TaskDetails extends React.Component {
         let position = 'left';
         if (jwtDecode(localStorage.getItem("token")).sub === comment.user)
             position = 'right';
-        console.log(comment);
         return {
             position: position,
             type: 'text',
@@ -137,13 +193,17 @@ class TaskDetails extends React.Component {
 
     }
 
-    _onSendComment = () => {
+    _onSendComment = async () => {
         const content = document.getElementById('content_input').value;
-        createComment({
+        const comment = {
             toDoId: this.state.taskId,
             content: content
-        });
+        };
+        logger.info(this._hubConnection.state);
+        createComment(comment);
     }
+
+    _hubConnection = null;
 
     render() {
         if (!this.state.isUserLoggedIn)

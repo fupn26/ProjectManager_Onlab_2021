@@ -1,3 +1,4 @@
+using CommentAPI.Controllers;
 using CommentAPI.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,6 +32,8 @@ namespace CommentAPI
             services.AddSingleton<IDbContext, DbContext>();
             services.AddSingleton<ICommentRepository, CommentRepository>();
 
+            services.AddSignalR();
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -55,6 +58,7 @@ namespace CommentAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<CommentHub>("/commentHub");
             });
         }
     }

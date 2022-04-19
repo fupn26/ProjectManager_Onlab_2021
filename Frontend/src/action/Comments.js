@@ -18,8 +18,20 @@ export function createComment({toDoId, content}) {
         .catch(error => logger.error(error));
 }
 
-export function getComments() {
-    axios.get('/api/v1/comment', {
+export function getComments(toDoId) {
+    axios.get(`/api/v1/comment/find?toDoId=${toDoId}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+    }).then(response => dispatcher.dispatch({
+        action: commentListFetched,
+        payload: response.data
+    }))
+        .catch(error => logger.error(error));
+}
+
+export function getComment(id) {
+    axios.get(`/api/v1/comment${id}`, {
         headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
         }

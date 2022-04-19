@@ -3,6 +3,8 @@ using CommentAPI.Models;
 using CommentAPI.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -16,11 +18,15 @@ namespace CommentAPI.Controllers
     [ApiController]
     public class CommentController : ControllerBase
     {
+        private readonly ILogger _logger;
         private readonly ICommentRepository _repository;
+        private readonly IHubContext<CommentHub> _hubContext;
 
-        public CommentController(ICommentRepository repository)
+        public CommentController(ICommentRepository repository, ILogger<CommentController> logger, IHubContext<CommentHub> hubContext)
         {
             _repository = repository;
+            _logger = logger;
+            _hubContext = hubContext;
         }
 
         [HttpPost]
@@ -46,6 +52,8 @@ namespace CommentAPI.Controllers
             try
             {
                 await _repository.Create(comment);
+                _logger.LogInformation($"Comment created with id: {comment.Id}");
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage");
             }
             catch (MongoWriteException e)
             {
@@ -72,6 +80,13 @@ namespace CommentAPI.Controllers
         public async Task<ActionResult<List<Comment>>> Get()
         {
             var result = await _repository.Get();
+            return result.ToList();
+        }
+
+        [HttpGet("find")]
+        public async Task<ActionResult<List<Comment>>> GetByToDoId([FromQuery] string toDoId)
+        {
+            var result = await _repository.GetCommentByToDoId(toDoId);
             return result.ToList();
         }
 

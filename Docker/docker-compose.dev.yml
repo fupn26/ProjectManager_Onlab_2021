@@ -11,6 +11,7 @@ services:
     ports:
       - "5000:80"
       - "5001:8080"
+      - "81:81"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -94,9 +95,9 @@ services:
       - project_mongo
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`)"
-      - "traefik.http.middlewares.comment-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
-      - "traefik.http.routers.comment.middlewares=comment-auth@docker"
+      - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`, `/commentHub`)"
+    #  - "traefik.http.middlewares.comment-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+    #  - "traefik.http.routers.comment.middlewares=comment-auth@docker"
 
   mail_service:
     build:

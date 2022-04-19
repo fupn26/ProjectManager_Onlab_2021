@@ -2,10 +2,11 @@
 import React from "react";
 import {Redirect} from "react-router-dom";
 import PropTypes from "prop-types";
-import {changeStatus, getTasks} from "../../action/Tasks";
+import {changeStatus, deleteTask, getTasks} from "../../action/Tasks";
 import taskStore from "../../store/impl/TaskStore";
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 import {Button, Card} from "react-bootstrap";
+
 import {doing, doings, done, dones, toDo, toDos} from "../../action/TaskStatusConstants";
 
 class TaskList extends React.Component {
@@ -13,7 +14,9 @@ class TaskList extends React.Component {
         super(props);
         this.state = {
             tasks: null,
-            redirect: false,
+            redirectToRecordForm: false,
+            redirectToTaskDetails: false,
+            selectedTaskId: null,
             columns: [
                 {
                     id: toDos,
@@ -33,7 +36,7 @@ class TaskList extends React.Component {
 
     _onAddClicked = () => {
         console.log("Clicked");
-        this.setState({redirect: true});
+        this.setState({redirectToRecordForm: true});
     }
 
     _onDragEnd = (results) => {
@@ -51,8 +54,8 @@ class TaskList extends React.Component {
     }
 
     componentDidMount() {
-        getTasks(this.props.projectid);
         taskStore.addChangeListener(this._getAllTaskFromStore);
+        getTasks(this.props.projectid);
     }
 
     componentWillUnmount() {
@@ -60,15 +63,25 @@ class TaskList extends React.Component {
     }
 
     _getAllTaskFromStore = () => {
-        if (this.state.tasks === taskStore._tasks)
-            getTasks(this.props.projectid);
-        else
-            this.setState({tasks: taskStore._tasks});
+        this.setState({tasks: taskStore._tasks});
+    }
+
+    _onDeleteButtonClicked = (taskId) => {
+        deleteTask(taskId);
+    }
+
+    _onDetailsButtonClicked = (taskId) => {
+        this.setState({
+            redirectToTaskDetails: true,
+            selectedTaskId: taskId
+        });
     }
 
     render() {
-        if (this.state.redirect)
+        if (this.state.redirectToRecordForm)
             return (<Redirect push to={`/tasks/add/${this.props.projectid}`}/>);
+        if (this.state.redirectToTaskDetails)
+            return (<Redirect push to={`/tasks/${this.state.selectedTaskId}`}/>);
         if (this.state.tasks === null) {
             return (<h3>{`Can't load tasks for project ${this.props.projectid}`}</h3>);
         }
@@ -101,6 +114,13 @@ class TaskList extends React.Component {
                                                             >
                                                                 <Card.Header>{item.title}</Card.Header>
                                                                 <Card.Body>{item.description}</Card.Body>
+                                                                <Card.Footer>
+                                                                    <Button variant={'danger'} onClick={() =>
+                                                                        this._onDeleteButtonClicked(item.id)}>Delete</Button>
+                                                                    <Button variant={'primary'} onClick={() =>
+                                                                        this._onDetailsButtonClicked(item.id)
+                                                                    }>Details</Button>
+                                                                </Card.Footer>
                                                             </div>
                                                         )}
                                                     </Draggable>

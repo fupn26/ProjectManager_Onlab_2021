@@ -66,7 +66,9 @@ class UserAdd extends React.Component {
             <>
                 <FormLabel>Members</FormLabel>
                 <ListGroup>
-                    <ListGroupItem>{this._mapToUserName(this.props.creator)}</ListGroupItem>
+                    {
+                        (this.props.creator !== undefined) && <ListGroupItem>{this._mapToUserName(this.props.creator)}</ListGroupItem>
+                    }
                     {
                         this.state.members.map(member => (
                             <ListGroupItem key={member.id}>

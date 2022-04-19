@@ -9,7 +9,7 @@ import dispatcher from "../../dispatcher/Dispatcher";
 import jwtDecode from "jwt-decode";
 
 class MeetingStore extends BaseStore {
-    _meetings = null;
+    _meetings = [];
 }
 
 const store = new MeetingStore();
@@ -18,6 +18,7 @@ export default store;
 dispatcher.register(({action, payload}) => {
     if (action === meetingListArrived) {
         store._meetings = payload;
+        console.log(payload);
         store.emitChange();
     }
     else if (action === meetingCreated) {

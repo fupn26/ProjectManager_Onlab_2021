@@ -1,13 +1,14 @@
 import axios from 'axios';
 import dispatcher from '../dispatcher/Dispatcher';
-import {addTask, changeTaskStatus, refreshTasks} from "../dispatcher/TaskActionConstants";
+import {addTask, changeTaskStatus, refreshTasks, removeTask} from "../dispatcher/TaskActionConstants";
 import logger from "../logger/Logger";
 
-export function createTask(projectId, title, description) {
+export function createTask(projectId, title, description, assignees) {
     axios.post('/api/v1/todo', {
         projectId: projectId,
         title: title,
-        description: description
+        description: description,
+        assignees: assignees
     }, {
         headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -44,7 +45,22 @@ export function changeStatus(taskId, status) {
     })
         .then(() => dispatcher.dispatch({
             action: changeTaskStatus,
-            payload: null
+            payload: {
+                taskId: taskId,
+                status: status
+            }
         }))
+        .catch(error => logger.error(error));
+}
+
+export function deleteTask(taskId) {
+    axios.delete(`/api/v1/todo/${taskId}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+    }).then(() => dispatcher.dispatch({
+        action: removeTask,
+        payload: taskId
+    }))
         .catch(error => logger.error(error));
 }

@@ -17,6 +17,7 @@ import LoginForm from "./component/users/LoginForm";
 import MainNavBar from "./component/MainNavBar";
 import ProjectUpdateForm from "./component/projects/ProjectUpdateForm";
 import RegisterForm from "./component/users/RegisterForm";
+import TaskDetails from "./component/tasks/TaskDetails";
 
 const App = () => {
     return (
@@ -36,6 +37,7 @@ const App = () => {
                     <Profile />
                 </Route>
                 <Route path="/tasks/add/:id" component={TaskRecordForm}/>
+                <Route path="/tasks/:id" component={TaskDetails}/>
                 <Route path="/login" component={LoginForm}/>
                 <Route path="/register" component={RegisterForm}/>
                 <Route path="/">

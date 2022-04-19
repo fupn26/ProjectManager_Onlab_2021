@@ -1,5 +1,6 @@
 module.exports = {
     addTask: 'CREATE_TASK',
     refreshTasks: 'REFRESH_TASK',
-    changeTaskStatus: 'CHANGE_TASK_STATUS'
+    changeTaskStatus: 'CHANGE_TASK_STATUS',
+    removeTask: 'REMOVE_TASK'
 };

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ToDoAPI.Cache;
 using ToDoAPI.Controllers.DTO;
 using ToDoAPI.Models;
 using ToDoAPI.Repositories;
@@ -17,10 +18,12 @@ namespace ToDoAPI.Controllers
     public class ToDoController : ControllerBase
     {
         private readonly IToDoRepository _repository;
+        private readonly IToDoCache _toDoCache;
 
-        public ToDoController(IToDoRepository repository)
+        public ToDoController(IToDoRepository repository, IToDoCache toDoCache)
         {
             _repository = repository;
+            _toDoCache = toDoCache;
         }
 
         [HttpPost]
@@ -51,29 +54,43 @@ namespace ToDoAPI.Controllers
         [HttpGet("{id:length(24)}", Name = "GetToDo")]
         public async Task<ActionResult<ToDo>> GetById(string id)
         {
-            var toDo = await _repository.Get(id);
-
-            if (toDo == null)
+            var toDo = await _toDoCache.GetCachedToDo(id);
+            if (toDo != null)
+                return toDo;
+            else
             {
-                return NotFound();
-            }
+                toDo = await _repository.Get(id);
 
-            return toDo;
+                if (toDo == null)
+                {
+                    return NotFound();
+                }
+
+                await _toDoCache.Add(toDo);
+                return toDo;
+            }
         }
 
         [HttpGet]
         public async Task<ActionResult<List<ToDo>>> Get([FromQuery] string projectId)
         {
+            List<ToDo> toDos;
+
             if (projectId == null)
             {
-                var result = await _repository.Get();
-                return result.ToList();
+                toDos = (await _repository.Get()).ToList();
             }
             else
             {
-                var toDos = await _repository.GetByProjectId(projectId);
-                return toDos.ToList();
+                toDos = (await _repository.GetByProjectId(projectId)).ToList();
             }
+
+            foreach (var item in toDos)
+            {
+                await _toDoCache.Add(item);
+            }
+
+            return toDos;
         }
 
         [HttpPatch("{id:length(24)}/status/todo")]
@@ -88,6 +105,7 @@ namespace ToDoAPI.Controllers
 
             toDo.Status = EToDoStatus.TODO;
             await _repository.Update(toDo);
+            await _toDoCache.Invalidate(toDo.Id.ToString());
 
             return Ok();
         }
@@ -104,6 +122,7 @@ namespace ToDoAPI.Controllers
 
             toDo.Status = EToDoStatus.DOING;
             await _repository.Update(toDo);
+            await _toDoCache.Invalidate(toDo.Id.ToString());
 
             return Ok();
         }
@@ -120,6 +139,7 @@ namespace ToDoAPI.Controllers
 
             toDo.Status = EToDoStatus.DONE;
             await _repository.Update(toDo);
+            await _toDoCache.Invalidate(toDo.Id.ToString());
 
             return Ok();
         }
@@ -135,6 +155,7 @@ namespace ToDoAPI.Controllers
             }
 
             await _repository.Delete(id);
+            await _toDoCache.Invalidate(toDo.Id.ToString());
 
             return Ok();
         }

@@ -7,12 +7,15 @@ using MongoDAL.Settings;
 using Microsoft.Extensions.Configuration;
 using ToDoAPI.Repositories;
 using MongoDAL.Context;
+using ToDoAPI.Settings;
+using ToDoAPI.Cache;
 
 namespace ToDoAPI
 {
     public class Startup
     {
         private const string _nameOfDbSettings = "ToDoDbSettings";
+        private const string _nameOfCacheSettings = "ToDoCacheSettings";
 
         public Startup(IConfiguration configuration)
         {
@@ -27,8 +30,18 @@ namespace ToDoAPI
             services.Configure<DbSettings>(
                 Configuration.GetSection(_nameOfDbSettings));
 
+            var cacheSettings = new CacheSettings();
+            Configuration.GetSection(_nameOfCacheSettings).Bind(cacheSettings);
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = cacheSettings.ConnectionString;
+                options.InstanceName = cacheSettings.InstanceName;
+            });
+
             services.AddSingleton<IDbContext, DbContext>();
             services.AddSingleton<IToDoRepository, ToDoRepository>();
+            services.AddTransient<IToDoCache, ToDoCache>();
 
             services.AddControllers().AddNewtonsoftJson();
             services.AddSwaggerGen(c =>

@@ -64,10 +64,14 @@ class SignalRHub {
         await this._hubConnection.invoke(methodName);
     }
 
+    stop = () => {
+        this._hubConnection.stop().then(() => {
+            logger.info("SignalR conection closed.");
+        });
+    }
+
     _hubConnection = null
 }
-
-var hubConnection = null;
 
 class TaskDetails extends React.Component {
     constructor(props) {
@@ -99,13 +103,11 @@ class TaskDetails extends React.Component {
                 payload: `/tasks/${this.state.taskId}`
             });
         } else {
+            logger.info(`Component mounting with task id: ${this.state.taskId}`);
             getUsers();
             getTasks();
             getComments(this.state.taskId);
-            if (hubConnection == null) {
-                hubConnection = new SignalRHub(localStorage.getItem('token'), this.state.taskId);
-            }
-            this._hubConnection = hubConnection;
+            this._hubConnection = new SignalRHub(localStorage.getItem('token'), this.state.taskId);
         }
     }
 
@@ -115,6 +117,7 @@ class TaskDetails extends React.Component {
         taskStore.removeChangeListener(this._onTaskListChanged);
         projectStore.removeChangeListener(this._onProjectListChanged);
         commentStore.removeChangeListener(this._onCommentListChanged);
+        this._hubConnection.stop();
     }
 
     componentDidUpdate() {

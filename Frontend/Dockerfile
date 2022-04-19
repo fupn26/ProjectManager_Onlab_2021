@@ -7,8 +7,8 @@ FROM node:14-alpine as build
 WORKDIR /src
 COPY ["./", "Client/"]
 WORKDIR /src/Client
-RUN npm install
-RUN npm run build
+RUN yarn
+RUN yarn build
 
 FROM base AS final
 WORKDIR /app

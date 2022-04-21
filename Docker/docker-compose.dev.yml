@@ -18,6 +18,7 @@ services:
       - project-network
 
   project_service:
+    image: "${REGISTRY_URL:-microproject}/projects:${IMAGE_TAG:-latest}"
     build:
       context: ../ProjectService
       dockerfile: ProjectAPI/Dockerfile
@@ -36,6 +37,7 @@ services:
     depends_on:
       - project_mongo
       - project_rabbit
+      - users
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.project.rule=PathPrefix(`/api/v1/project`)"
@@ -43,6 +45,7 @@ services:
       - "traefik.http.routers.project.middlewares=project-auth@docker"
 
   meeting_service:
+    image: "${REGISTRY_URL:-microproject}/meetings:${IMAGE_TAG:-latest}"
     build:
       context: ../ProjectService
       dockerfile: MeetingAPI/Dockerfile
@@ -62,6 +65,7 @@ services:
       - "traefik.http.routers.meeting.middlewares=meeting-auth@docker"
 
   todo_service:
+    image: "${REGISTRY_URL:-microproject}/todos:${IMAGE_TAG:-latest}"
     build:
       context: ../ProjectService
       dockerfile: ToDoAPI/Dockerfile
@@ -83,6 +87,7 @@ services:
       - "traefik.http.routers.todo.middlewares=todo-auth@docker"
 
   comment_service:
+    image: "${REGISTRY_URL:-microproject}/comments:${IMAGE_TAG:-latest}"
     build:
       context: ../ProjectService
       dockerfile: CommentAPI/Dockerfile
@@ -102,6 +107,7 @@ services:
       - "traefik.http.routers.comment.middlewares=comment-auth@docker"
 
   mail_service:
+    image: "${REGISTRY_URL:-microproject}/mails:${IMAGE_TAG:-latest}"
     build:
       context: ../MailService
     networks:
@@ -120,6 +126,7 @@ services:
       - SENDGRID_SENDER_EMAIL=hifyalorzu@vusra.com
 
   users:
+    image: "${REGISTRY_URL:-microproject}/users:${IMAGE_TAG:-latest}"
     build: 
       context: ../UserService
       dockerfile: ./Dockerfile
@@ -152,6 +159,7 @@ services:
       - "traefik.http.routers.user.middlewares=user-auth@docker"
 
   web:
+    image: "${REGISTRY_URL:-microproject}/web:${IMAGE_TAG:-latest}"
     build:
       context: ../Frontend
       dockerfile: ./Dockerfile

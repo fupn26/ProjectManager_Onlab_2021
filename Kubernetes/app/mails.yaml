@@ -37,7 +37,7 @@ spec:
             - name: USER_SERVICE_HOST
               value: users
             - name: USER_SERVICE_PORT
-              value: "8080"
+              value: "80"
             - name: SENDGRID_API_KEY
               valueFrom:
                 secretKeyRef:

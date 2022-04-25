@@ -14,7 +14,7 @@
 ## Creating Kubernetes Secrets
 For using the yaml descriptors in ```Kubernetes``` directory, you have to create multiple secret files.
 ### Secrects for Databases
-Create these files in ```Kubernetes/db``` directory
+Create these files in ```Kubernetes/secret``` directory
 #### MySQL secret
 ```yaml
 apiVersion: v1
@@ -29,7 +29,7 @@ stringData:
   root_password: # During the initialization of the mysql container, a root user is created. This will be the password of this generated root user.
 ```
 ### Secrets for Services
-Create these files in ```Kubernetes/service``` directory
+Create these files in ```Kubernetes/secret``` directory
 #### RabbitMq secret
 ```yaml
 apiVersion: v1
@@ -66,6 +66,11 @@ stringData:
   jwt_secret: # value which is used for generating JWT tokens
   admin_password: # the password of the deafult admin user
 ```
+
+## Install Secrets
+1. Navigate to ```Kubernetes``` directory
+2. ```kubectl apply -f secret```
+
 ## Install Ingress Controller
 1. ```helm repo add traefik https://helm.traefik.io/traefik```
 2. ```helm repo update```

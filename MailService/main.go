@@ -56,6 +56,7 @@ func getUserInfos(userIds []string) ([]User, error) {
 
 	if err != nil {
 		log.Println("error GETing user list", client.LogString())
+		return nil, err
 	}
 	defer resp.Body.Close()
 	log.Printf("example.com %s", resp.Status)

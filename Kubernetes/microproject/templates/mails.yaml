@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mails
+  labels:
+    app.kubernetes.io/name: mails
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    microproject.tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mails
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mails
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        microproject.tier: backend
+    spec:
+      containers:
+        - name: mails
+          image: microproject/mails:{{ .Values.mails.tag }}
+          env:
+            - name: RABBIT_HOST
+              value: rabbitmq
+            - name: RABBIT_PORT
+              value: "5672"
+            - name: RABBIT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: username
+            - name: RABBIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: user_password
+            - name: USER_SERVICE_HOST
+              value: users
+            - name: USER_SERVICE_PORT
+              value: "80"
+            - name: SENDGRID_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mail-secret
+                  key: sendgrid_api_key
+            - name: SENDGRID_SENDER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: mail-secret
+                  key: sendgrid_sender_name
+            - name: SENDGRID_SENDER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: mail-secret
+                  key: sendgrid_sender_email
+      restartPolicy: Always

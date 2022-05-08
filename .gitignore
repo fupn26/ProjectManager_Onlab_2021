@@ -635,5 +635,8 @@ FodyWeavers.xsd
 # generated pdfs
 *.pdf
 
+# Kubernetes secret files
+*secret.yaml
+
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,aspnetcore,intellij+all,maven
 /Docker/jeygezt.txt

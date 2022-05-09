@@ -9,6 +9,7 @@ import com.example.repository.UserRepository;
 import com.example.service.JwtTokenUtil;
 import com.example.service.UserDbInitializer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final UserRepository userRepository;
@@ -40,10 +42,16 @@ public class UserController {
     }
 
     @GetMapping("/auth")
-    public void authUser(@RequestHeader(value = "Authorization") String credentials) {
+    public void authUser(@RequestHeader(value = "Authorization", required = false) String credentialsFromHeader, @RequestAttribute(name = "access_token", required = false) String credentialsFromQuery) {
         dbInitializer.initDb(); // init db if it is not initialized already
-        Optional<String> token = jwtTokenUtil.getTokenFromHeader(credentials);
-        if (token.isEmpty() || !jwtTokenUtil.isValidToken(token.get())
+        log.info("Auth has been requested by: {} {}", credentialsFromHeader, credentialsFromQuery);
+        Optional<String> token = jwtTokenUtil.getTokenFromHeader(credentialsFromHeader);
+        if (token.isEmpty())
+            if (credentialsFromQuery == null)
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+            else
+                token = Optional.of(credentialsFromQuery);
+        if (!jwtTokenUtil.isValidToken(token.get())
                 || !userRepository.existsById(UUID.fromString(jwtTokenUtil.getUserId(token.get()))))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }

@@ -20,7 +20,7 @@ services:
   project_service:
     image: "${REGISTRY_URL:-microproject}/projects:${IMAGE_TAG:-latest}"
     build:
-      context: ../ProjectService
+      context: ../src/ProjectService
       dockerfile: ProjectAPI/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=DockerDev
@@ -47,7 +47,7 @@ services:
   meeting_service:
     image: "${REGISTRY_URL:-microproject}/meetings:${IMAGE_TAG:-latest}"
     build:
-      context: ../ProjectService
+      context: ../src/ProjectService
       dockerfile: MeetingAPI/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=DockerDev
@@ -67,7 +67,7 @@ services:
   todo_service:
     image: "${REGISTRY_URL:-microproject}/todos:${IMAGE_TAG:-latest}"
     build:
-      context: ../ProjectService
+      context: ../src/ProjectService
       dockerfile: ToDoAPI/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=DockerDev
@@ -89,7 +89,7 @@ services:
   comment_service:
     image: "${REGISTRY_URL:-microproject}/comments:${IMAGE_TAG:-latest}"
     build:
-      context: ../ProjectService
+      context: ../src/ProjectService
       dockerfile: CommentAPI/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=DockerDev
@@ -109,7 +109,7 @@ services:
   mail_service:
     image: "${REGISTRY_URL:-microproject}/mails:${IMAGE_TAG:-latest}"
     build:
-      context: ../MailService
+      context: ../src/MailService
     networks:
       - project-network
     depends_on:
@@ -128,7 +128,7 @@ services:
   users:
     image: "${REGISTRY_URL:-microproject}/users:${IMAGE_TAG:-latest}"
     build: 
-      context: ../UserService
+      context: ../src/UserService
       dockerfile: ./Dockerfile
     environment:
       - DB_HOST=project_mysql
@@ -161,7 +161,7 @@ services:
   web:
     image: "${REGISTRY_URL:-microproject}/web:${IMAGE_TAG:-latest}"
     build:
-      context: ../Frontend
+      context: ../src/Frontend
       dockerfile: ./Dockerfile
     networks:
       - project-network

@@ -8,6 +8,12 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--api.dashboard=true"
+      - "--tracing.jaeger=true"
+      - "--tracing.servicename=traefik"
+      - "--tracing.jaeger.samplingParam=1.0"
+      - "--tracing.jaeger.samplingType=const"
+      - "--tracing.jaeger.localAgentHostPort=project_jaeger:6831"
+      - "--tracing.jaeger.samplingServerURL=http://project_jaeger:5778/sampling"
     ports:
       - "5000:80"
       - "5001:8080"
@@ -143,6 +149,10 @@ services:
       - RABBIT_PORT=${RABBIT_PORT}
       - RABBIT_USER=${RABBIT_USER}
       - RABBIT_PASS=${RABBIT_PASS}
+      - OTEL_TRACES_EXPORTER=jaeger
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://project_jaeger:14250
+      - OTEL_EXPORTER_JAEGER_TIMEOUT=10000
+      - OTEL_SERVICE_NAME=users
     networks:
       - project-network
     ports:
@@ -201,6 +211,29 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
+    networks:
+      - project-network
+
+  project_jaeger:
+    image: jaegertracing/all-in-one:1.33
+    environment:
+      SPAN_STORAGE_TYPE: elasticsearch
+      ES_SERVER_URLS: http://project_elasticsearch:9200
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
+    networks:
+      - project-network
+
+
+  project_elasticsearch:
+    image: elasticsearch:7.17.3
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
     networks:
       - project-network
       

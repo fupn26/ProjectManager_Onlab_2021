@@ -36,6 +36,8 @@ services:
       - RabbitMqSettings__Username=${RABBIT_USER}
       - RabbitMqSettings__Password=${RABBIT_PASS}
       - UserServiceSettings__BaseUrl=http://users:8080
+      - JaegerSettings__Host=project_jaeger
+      - JaegerSettings__Port=6831
     networks:
       - project-network
     ports:

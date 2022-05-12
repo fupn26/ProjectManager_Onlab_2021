@@ -17,9 +17,9 @@ using ProjectAPI.Settings;
 using Polly;
 using System.Net.Http;
 using System.Net;
-using ProjectAPI.Controllers.DTO;
-using Newtonsoft.Json;
-using ProjectAPI.WebServices.DTO;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
+
 
 namespace ProjectAPI
 {
@@ -28,6 +28,9 @@ namespace ProjectAPI
         private const string _nameOfDbSettings = "ProjectDbSettings";
         private const string _nameOfRabbitMqSettings = "RabbitMqSettings";
         private const string _nameOfUserServiceSettings = "UserServiceSettings";
+        private const string _nameOfJaegerSettings = "JaegerSettings";
+        private const string _serviceName = "projects";
+        private const string _serviceVersion = "v1";
 
         public Startup(IConfiguration configuration)
         {
@@ -39,24 +42,69 @@ namespace ProjectAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            AddConfigurations(services);
+            AddServices(services);
+            AddOpenTelemetry(services);
+            AddPolly(services);
+
+            services.AddControllers();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc(_serviceVersion, new OpenApiInfo { Title = "ProjectAPI", Version = _serviceVersion });
+            });
+            // Alternative for native RabbitMq communication
+            //services.AddMassTransit(x =>
+            //{
+            //    var settings = Configuration.GetSection(_nameOfRabbitMqSettings).Get<RabbitMqSettings>(); // as RabbitMqSettings;
+            //    x.UsingRabbitMq((context, cfg) =>
+            //    {
+            //        cfg.Host(settings.Host, settings.VirtualHost, h =>
+            //        {
+            //            h.Username(settings.Username);
+            //            h.Password(settings.Password);
+            //        });
+            //    });
+            //});
+            //services.AddMassTransitHostedService(true);
+        }
+
+        private void AddConfigurations(IServiceCollection services)
+        {
             services.Configure<DbSettings>(
                 Configuration.GetSection(_nameOfDbSettings));
 
             services.Configure<RabbitMqSettings>(
                 Configuration.GetSection(_nameOfRabbitMqSettings));
+        }
 
+        private void AddServices(IServiceCollection services)
+        {
             services.AddSingleton<IDbContext, DbContext>();
             services.AddSingleton<IProjectRepository, ProjectRepository>();
             services.AddSingleton<IMessagePublisher, MessagingService.MessagePublisher>();
+        }
 
-            services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProjectAPI", Version = "v1" });
-            });
+        private void AddOpenTelemetry(IServiceCollection services)
+        {
+            var jaegerSettings = Configuration.GetSection(_nameOfJaegerSettings).Get<JaegerSettings>();
+            services.AddOpenTelemetryTracing((builder) => builder
+                            .AddJaegerExporter(o =>
+                            {
+                                o.AgentHost = jaegerSettings.Host;
+                                o.AgentPort = jaegerSettings.Port;
+                            })
+                            .AddSource(_serviceName)
+                            .SetResourceBuilder(ResourceBuilder
+                                .CreateDefault()
+                                .AddService(serviceName: _serviceName, serviceVersion: _serviceVersion)
+                            )
+                            .AddAspNetCoreInstrumentation()
+                        );
+        }
 
+        private void AddPolly(IServiceCollection services)
+        {
             var userSettings = Configuration.GetSection(_nameOfUserServiceSettings).Get<UserServiceSettings>();
-
             bool RetryableStatusCodesPredicate(HttpStatusCode statusCode) =>
                 statusCode == HttpStatusCode.BadGateway
                     || statusCode == HttpStatusCode.ServiceUnavailable
@@ -77,21 +125,6 @@ namespace ProjectAPI
                 .AddPolicyHandler(Policy
                     .WrapAsync(waitAndRetryPolicy, circuitBreaker)
                 );
-
-            // Alternative for native RabbitMq communication
-            //services.AddMassTransit(x =>
-            //{
-            //    var settings = Configuration.GetSection(_nameOfRabbitMqSettings).Get<RabbitMqSettings>(); // as RabbitMqSettings;
-            //    x.UsingRabbitMq((context, cfg) =>
-            //    {
-            //        cfg.Host(settings.Host, settings.VirtualHost, h =>
-            //        {
-            //            h.Username(settings.Username);
-            //            h.Password(settings.Password);
-            //        });
-            //    });
-            //});
-            //services.AddMassTransitHostedService(true);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

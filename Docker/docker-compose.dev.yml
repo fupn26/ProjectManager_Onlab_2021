@@ -23,6 +23,36 @@ services:
     networks:
       - project-network
 
+  authenticator:
+    image: quay.io/keycloak/keycloak:18.0.0
+    command:
+      #- "start-dev"
+      - "start"
+      - "--auto-build"
+      - "--hostname-strict-https=false"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_PASSWORD}
+      - KC_DB=mysql
+      - KC_DB_URL_HOST=project_mysql
+      - KC_DB_URL_PORT=3306
+      - KC_DB_URL_DATABASE=${MYSQL_DB}
+      - KC_DB_USERNAME=${MYSQL_USER}
+      - KC_DB_PASSWORD=${MYSQL_PASSWORD}
+      - KC_HTTP_RELATIVE_PATH=keycloak
+      - KC_PROXY=edge
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+    ports:
+      - "8080:8080"
+    depends_on:
+      - project_mysql
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.authenticator.rule=PathPrefix(`/keycloak/admin`, `/keycloak/js`, `/keycloak/realms`, `/keycloak/resources`, `/keycloak/robots.txt`)"
+    networks:
+      - project-network
+
   project_service:
     image: "${REGISTRY_URL:-microproject}/projects:${IMAGE_TAG:-latest}"
     build:
@@ -204,7 +234,7 @@ services:
       - project-network
 
   project_mysql: 
-    image: mysql
+    image: mysql:8
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: example
@@ -221,6 +251,8 @@ services:
     environment:
       SPAN_STORAGE_TYPE: elasticsearch
       ES_SERVER_URLS: http://project_elasticsearch:9200
+    depends_on:
+      - project_elasticsearch
     ports:
       - "6831:6831/udp"
       - "16686:16686"

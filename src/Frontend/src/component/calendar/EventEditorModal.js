@@ -12,9 +12,8 @@ import ModalHeader from "react-bootstrap/ModalHeader";
 import React from "react";
 import PropTypes from 'prop-types';
 import UserAdd from "../users/UserAdd";
-import jwtDecode from "jwt-decode";
 import userStore from "../../store/impl/UserStore";
-import {getUsers} from "../../action/Users";
+import {getUserInfo, getUsers} from "../../action/Users";
 import {fetchAllProjects} from "../../action/Projects";
 import projectStore from "../../store/impl/ProjectStore";
 import logger from "../../logger/Logger";
@@ -27,12 +26,14 @@ class EventEditorModal extends React.Component {
         this.state = {
             users: [],
             projects: [],
+            currentUsername: '',
             optionPlaceholderText: 'Select project...',
             isProjectSelected: false,
             selectedProject: null,
             memberList: []
         };
         this._onUserListUpdated = this._onUserListUpdated.bind(this);
+        this._onUsernameUpdated = this._onUsernameUpdated.bind(this);
         this._onSaveChanges = this._onSaveChanges.bind(this);
         this._onProjectListUpdated = this._onProjectListUpdated.bind(this);
         this._onProjectSelectChanged = this._onProjectSelectChanged.bind(this);
@@ -51,19 +52,23 @@ class EventEditorModal extends React.Component {
         console.log('editor modal has been mounted');
         getUsers();
         fetchAllProjects();
+        if (userStore._current_username === '')
+            getUserInfo();
+        userStore.addChangeListener(this._onUsernameUpdated);
         userStore.addChangeListener(this._onUserListUpdated);
         projectStore.addChangeListener(this._onProjectListUpdated);
     }
 
     componentWillUnmount() {
         userStore.removeChangeListener(this._onUserListUpdated);
+        userStore.addChangeListener(this._onUsernameUpdated);
         projectStore.removeChangeListener(this._onProjectListUpdated);
     }
 
     _onProjectListUpdated() {
         this.setState({
             projects: projectStore._projects.filter(project => {
-                return project.members.includes(jwtDecode(localStorage.getItem("token")).sub);
+                return project.members.includes(this.state.username);
             })
         });
     }
@@ -71,6 +76,12 @@ class EventEditorModal extends React.Component {
     _onUserListUpdated() {
         this.setState({
             users: userStore._users
+        });
+    }
+
+    _onUsernameUpdated() {
+        this.setState({
+            users: userStore._current_username
         });
     }
 
@@ -86,7 +97,7 @@ class EventEditorModal extends React.Component {
             startTime: document.getElementById('start_date_input').value + timeZoneOffset,
             endTime: document.getElementById('end_date_input').value + timeZoneOffset,
             place: document.getElementById('place_input').value,
-            participants: [...this.state.memberList, jwtDecode(localStorage.getItem("token")).sub],
+            participants: [...this.state.memberList, this.state.username],
             notes: this._isEditing() ? document.getElementById('notes_input').value : ''
         };
         if (this._isEditing())
@@ -226,8 +237,7 @@ class EventEditorModal extends React.Component {
                                 this.state.isProjectSelected && <UserAdd members={this.props.meeting == null ? []
                                     : this.props.meeting.participants.map(this._mapToUserWithNameId)}
                                                                          users={this.state.users}
-                                                                         creator={jwtDecode(localStorage
-                                                                             .getItem("token")).sub}
+                                                                         creator={this.state.username}
                                                                          onMemberAdded={this._onMemberAddedToMeeting}
                                                                          onMemberDeleted={this._onMemberDeletedToMeeting}/>
                             }

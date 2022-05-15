@@ -14,10 +14,10 @@ import {Redirect} from "react-router-dom";
 import "react-chat-elements/dist/main.css";
 import {MessageList} from "react-chat-elements";
 import commentStore from "../../store/impl/CommentStore";
-import jwtDecode from "jwt-decode";
 import {createComment, getComments} from "../../action/Comments";
 import * as signalR from "@microsoft/signalr";
 import logger from "../../logger/Logger";
+import Cookies from "js-cookie";
 
 class SignalRHub {
     constructor(token, taskId) {
@@ -87,12 +87,14 @@ class TaskDetails extends React.Component {
                 fontWeight: 'bold'
             },
             isUserLoggedIn: sessionStore._isUserLoggedIn,
-            isCommentHubConnected: false
+            isCommentHubConnected: false,
+            username: ''
         };
     }
 
     componentDidMount() {
         sessionStore.addChangeListener(this._updateSessionStateFromStore);
+        userStore.addChangeListener(this._onUsernameChanged);
         userStore.addChangeListener(this._onUserListChanged);
         taskStore.addChangeListener(this._onTaskListChanged);
         projectStore.addChangeListener(this._onProjectListChanged);
@@ -107,12 +109,13 @@ class TaskDetails extends React.Component {
             getUsers();
             getTasks();
             getComments(this.state.taskId);
-            this._hubConnection = new SignalRHub(localStorage.getItem('token'), this.state.taskId);
+            this._hubConnection = new SignalRHub(Cookies.get('access_token'), this.state.taskId);
         }
     }
 
     componentWillUnmount() {
-        sessionStore.addChangeListener(this._updateSessionStateFromStore);
+        sessionStore.removeChangeListener(this._updateSessionStateFromStore);
+        userStore.removeChangeListener(this._onUsernameChanged);
         userStore.removeChangeListener(this._onUserListChanged);
         taskStore.removeChangeListener(this._onTaskListChanged);
         projectStore.removeChangeListener(this._onProjectListChanged);
@@ -128,6 +131,12 @@ class TaskDetails extends React.Component {
             });
         }
     }
+
+    _onUsernameChanged = () => {
+        this.setState({
+            username: userStore._current_username
+        });
+    };
 
     _onCommentListChanged = () => {
         this.setState({
@@ -184,7 +193,7 @@ class TaskDetails extends React.Component {
         if (user != null)
             title = user.username;
         let position = 'left';
-        if (jwtDecode(localStorage.getItem("token")).sub === comment.user)
+        if (this.state.username === comment.user)
             position = 'right';
         return {
             position: position,

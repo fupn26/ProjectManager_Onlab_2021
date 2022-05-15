@@ -2,11 +2,12 @@ import axios from 'axios';
 import dispatcher from '../dispatcher/Dispatcher';
 import * as actionConstants from '../dispatcher/ProjectActionConstants';
 import logger from "../logger/Logger";
+import Cookies from "js-cookie";
 
 const _recordProject = ({title}) => {
     axios.post('/api/v1/project', {title: title}, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     })
         .then(() => {
@@ -23,7 +24,7 @@ const _recordProject = ({title}) => {
 const _fetchAllProjects = () => {
    axios.get('/api/v1/project', {
        headers: {
-           Authorization: `Bearer ${localStorage.getItem("token")}`
+           Authorization: `Bearer ${Cookies.get("access_token")}`
        }
    })
        .then(resp => {
@@ -40,7 +41,7 @@ const _fetchAllProjects = () => {
 const _fetchProjectWithId = (id) => {
     axios.get(`/api/v1/project/${id}`, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     })
         .then(resp => {
@@ -61,7 +62,7 @@ const _updateProject = (id, title, members) => {
         members: members
     }, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     }).then(() => {
         dispatcher.dispatch({
@@ -77,7 +78,7 @@ const _updateProject = (id, title, members) => {
 const _deleteProject = (id) => {
     axios.delete(`/api/v1/project/${id}`, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     })
         .then(() => {

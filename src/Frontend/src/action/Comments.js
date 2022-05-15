@@ -2,6 +2,7 @@ import axios from "axios";
 import logger from "../logger/Logger";
 import dispatcher from "../dispatcher/Dispatcher";
 import {commentCreated, commentListFetched} from "../dispatcher/CommentActionConstants";
+import Cookies from "js-cookie";
 
 export function createComment({toDoId, content}) {
     axios.post('/api/v1/comment', {
@@ -9,7 +10,7 @@ export function createComment({toDoId, content}) {
         content: content
     }, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     }).then(response => dispatcher.dispatch({
         action: commentCreated,
@@ -21,7 +22,7 @@ export function createComment({toDoId, content}) {
 export function getComments(toDoId) {
     axios.get(`/api/v1/comment/find?toDoId=${toDoId}`, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     }).then(response => dispatcher.dispatch({
         action: commentListFetched,
@@ -33,7 +34,7 @@ export function getComments(toDoId) {
 export function getComment(id) {
     axios.get(`/api/v1/comment${id}`, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     }).then(response => dispatcher.dispatch({
         action: commentListFetched,

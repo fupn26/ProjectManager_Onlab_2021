@@ -5,7 +5,7 @@ import {
     registerSuccess
 } from "../dispatcher/SessionActionConstants";
 import dispatcher from "../dispatcher/Dispatcher";
-import {userListArrived} from "../dispatcher/UserActionConstants";
+import {userListArrived, usernameArrived} from "../dispatcher/UserActionConstants";
 import logger from "../logger/Logger";
 import Cookies from "js-cookie";
 //import Keycloak from "keycloak-js";
@@ -111,7 +111,7 @@ function getExpireDate(milliseconds) {
 export function getUsers() {
     axios.get('/api/v1/user', {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     })
         .then(response => {
@@ -123,6 +123,17 @@ export function getUsers() {
         .catch(error => {
             logger.error(error);
         });
+}
+
+export function getUserInfo() {
+    axios.get('/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo', {
+        headers: {
+            Authorization: `Bearer ${Cookies.get("access_token")}`
+        }
+    }).then(response => dispatcher.dispatch({
+        action: usernameArrived,
+        payload: response.data.preferred_username
+    })).catch(error => logger.error(error));
 }
 
 export function registerUser(email, username, password) {

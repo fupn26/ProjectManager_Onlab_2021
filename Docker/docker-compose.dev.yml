@@ -79,7 +79,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.project.rule=PathPrefix(`/api/v1/project`)"
-      - "traefik.http.middlewares.project-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.middlewares.project-auth.forwardauth.address=http://authenticator:8080/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo"
       - "traefik.http.routers.project.middlewares=project-auth@docker"
 
   meeting_service:
@@ -99,7 +99,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.meeting.rule=PathPrefix(`/api/v1/meeting`)"
-      - "traefik.http.middlewares.meeting-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.middlewares.meeting-auth.forwardauth.address=http://authenticator:8080/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo"
       - "traefik.http.routers.meeting.middlewares=meeting-auth@docker"
 
   todo_service:
@@ -121,7 +121,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.todo.rule=PathPrefix(`/api/v1/todo`)"
-      - "traefik.http.middlewares.todo-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.middlewares.todo-auth.forwardauth.address=http://authenticator:8080/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo"
       - "traefik.http.routers.todo.middlewares=todo-auth@docker"
 
   comment_service:
@@ -141,7 +141,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`, `/commentHub`)"
-      - "traefik.http.middlewares.comment-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.middlewares.comment-auth.forwardauth.address=http://authenticator:8080/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo"
       - "traefik.http.routers.comment.middlewares=comment-auth@docker"
 
   mail_service:
@@ -197,7 +197,7 @@ services:
       - "traefik.http.routers.register.rule=PathPrefix(`/api/v1/user/register`)"
       - "traefik.http.routers.signin.rule=PathPrefix(`/api/v1/user/signin`)"
       - "traefik.http.routers.user.rule=PathPrefix(`/api/v1/user`)"
-      - "traefik.http.middlewares.user-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.middlewares.user-auth.forwardauth.address=http://authenticator:8080/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo"
       - "traefik.http.routers.user.middlewares=user-auth@docker"
 
   web:

@@ -2,6 +2,7 @@ import axios from "axios";
 import logger from "../logger/Logger";
 import dispatcher from "../dispatcher/Dispatcher";
 import {meetingCreated, meetingDeleted, meetingListArrived, meetingUpdated} from "../dispatcher/MeetingActionConstants";
+import Cookies from "js-cookie";
 
 export function createMeeting({projectId, theme, startTime, endTime, place, participants, notes}) {
     logger.info('Creating meeting...');
@@ -17,7 +18,7 @@ export function createMeeting({projectId, theme, startTime, endTime, place, part
 
     axios.post('/api/v1/meeting', dataToSend, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     }).then(response => dispatcher.dispatch({
         action: meetingCreated,
@@ -40,7 +41,7 @@ export function updateMeeting(meetingId, {projectId, theme, startTime, endTime, 
 
     axios.put(`/api/v1/meeting/${meetingId}`, dataToSend, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     }).then(() => dispatcher.dispatch({
         action: meetingUpdated,
@@ -56,7 +57,7 @@ export function getMeetings() {
     logger.info('Getting meetings...');
     axios.get('/api/v1/meeting', {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     })
         .then(response => dispatcher.dispatch({
@@ -70,7 +71,7 @@ export function deleteMeeting(meetingId) {
     logger.info(`Deleting meeting: ${meetingId}`);
     axios.delete(`/api/v1/meeting/${meetingId}`, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     }).then(() => dispatcher.dispatch({
         action: meetingDeleted,

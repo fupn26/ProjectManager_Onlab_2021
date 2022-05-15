@@ -1,9 +1,10 @@
 import dispatcher from "../../dispatcher/Dispatcher";
 import * as actions from "../../dispatcher/SessionActionConstants";
 import BaseStore from "../BaseStore";
+import Cookies from "js-cookie";
 
 class SessionStore extends BaseStore {
-    _isUserLoggedIn = localStorage.getItem("token") != null;
+    _isUserLoggedIn = Cookies.get("access_token") != null;
     _isLoginError = false;
     _redirectToOnSuccess = "/projects";
     _registerError = false;

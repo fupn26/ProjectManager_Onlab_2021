@@ -1,26 +1,24 @@
 import {Button, Container, Nav, Navbar} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
-import {useHistory} from "react-router-dom";
-import dispatcher from "../dispatcher/Dispatcher";
-import {logoutSuccess} from "../dispatcher/SessionActionConstants";
+//import {useHistory} from "react-router-dom";
 import sessionStore from "../store/impl/SessionStore";
+import {logout, retrieveToken, signIn} from "../action/Users";
+//import Keycloak from "keycloak-js";
 
 const MainNavBar = () => {
-    const history = useHistory();
+    //const history = useHistory();
     const [isLoggedIn, setIsLoggedIn] = useState(sessionStore._isUserLoggedIn);
 
     const onLogIn = () => {
         console.log("log in");
-        history.push("/login");
+//        window.location.href = 'http://localhost:5000/keycloak/realms/project_manager_realm/protocol/openid-connect/auth' +
+//            '?client_id=microproject-app&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2F&response_mode=fragment&response_type=code&scope=openid';
+        signIn();
     };
 
     const onLogOut = () => {
         console.log("log out");
-        localStorage.removeItem("token");
-        dispatcher.dispatch({
-            action: logoutSuccess
-        });
-        history.push("/");
+        logout();
     };
 
     const updateSessionState = () => {
@@ -29,6 +27,10 @@ const MainNavBar = () => {
 
     useEffect(() => {
        sessionStore.addChangeListener(updateSessionState);
+        let i = window.location.href.indexOf('code');
+        if(!isLoggedIn && i !== -1) {
+            retrieveToken(window.location.href.substring(i + 5));
+        }
        return function cleanup() {
            sessionStore.removeChangeListener(updateSessionState);
        };

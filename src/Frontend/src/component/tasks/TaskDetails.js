@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import {Alert, Button, FormControl, Stack, Table} from "react-bootstrap";
 import userStore from "../../store/impl/UserStore";
 import taskStore from "../../store/impl/TaskStore";
-import {getUsers} from "../../action/Users";
+import {getUserInfo, getUsers} from "../../action/Users";
 import {getTasks} from "../../action/Tasks";
 import projectStore from "../../store/impl/ProjectStore";
 import {fetchAllProjects} from "../../action/Projects";
@@ -88,13 +88,16 @@ class TaskDetails extends React.Component {
             },
             isUserLoggedIn: sessionStore._isUserLoggedIn,
             isCommentHubConnected: false,
-            username: ''
+            user: {
+                id: null,
+                username: null
+            }
         };
     }
 
     componentDidMount() {
         sessionStore.addChangeListener(this._updateSessionStateFromStore);
-        userStore.addChangeListener(this._onUsernameChanged);
+        userStore.addChangeListener(this._onUserChanged);
         userStore.addChangeListener(this._onUserListChanged);
         taskStore.addChangeListener(this._onTaskListChanged);
         projectStore.addChangeListener(this._onProjectListChanged);
@@ -107,6 +110,7 @@ class TaskDetails extends React.Component {
         } else {
             logger.info(`Component mounting with task id: ${this.state.taskId}`);
             getUsers();
+            getUserInfo();
             getTasks();
             getComments(this.state.taskId);
             this._hubConnection = new SignalRHub(Cookies.get('access_token'), this.state.taskId);
@@ -115,7 +119,7 @@ class TaskDetails extends React.Component {
 
     componentWillUnmount() {
         sessionStore.removeChangeListener(this._updateSessionStateFromStore);
-        userStore.removeChangeListener(this._onUsernameChanged);
+        userStore.removeChangeListener(this._onUserChanged);
         userStore.removeChangeListener(this._onUserListChanged);
         taskStore.removeChangeListener(this._onTaskListChanged);
         projectStore.removeChangeListener(this._onProjectListChanged);
@@ -132,9 +136,9 @@ class TaskDetails extends React.Component {
         }
     }
 
-    _onUsernameChanged = () => {
+    _onUserChanged = () => {
         this.setState({
-            username: userStore._current_username
+            user: userStore._current_user
         });
     };
 
@@ -193,7 +197,7 @@ class TaskDetails extends React.Component {
         if (user != null)
             title = user.username;
         let position = 'left';
-        if (this.state.username === comment.user)
+        if (this.state.user.id === comment.user)
             position = 'right';
         return {
             position: position,

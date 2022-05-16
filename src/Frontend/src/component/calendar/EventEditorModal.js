@@ -24,16 +24,16 @@ class EventEditorModal extends React.Component {
         super(props);
         logger.info('Passed meeting:' + props.meeting);
         this.state = {
-            users: [],
-            projects: [],
-            currentUsername: '',
+            users: userStore._users,
+            projects: projectStore._projects,
+            user: userStore._current_user,
             optionPlaceholderText: 'Select project...',
             isProjectSelected: false,
             selectedProject: null,
             memberList: []
         };
         this._onUserListUpdated = this._onUserListUpdated.bind(this);
-        this._onUsernameUpdated = this._onUsernameUpdated.bind(this);
+        this._onUserUpdated = this._onUserUpdated.bind(this);
         this._onSaveChanges = this._onSaveChanges.bind(this);
         this._onProjectListUpdated = this._onProjectListUpdated.bind(this);
         this._onProjectSelectChanged = this._onProjectSelectChanged.bind(this);
@@ -51,24 +51,22 @@ class EventEditorModal extends React.Component {
     componentDidMount() {
         console.log('editor modal has been mounted');
         getUsers();
-        fetchAllProjects();
-        if (userStore._current_username === '')
-            getUserInfo();
-        userStore.addChangeListener(this._onUsernameUpdated);
+        getUserInfo();
+        userStore.addChangeListener(this._onUserUpdated);
         userStore.addChangeListener(this._onUserListUpdated);
         projectStore.addChangeListener(this._onProjectListUpdated);
     }
 
     componentWillUnmount() {
         userStore.removeChangeListener(this._onUserListUpdated);
-        userStore.addChangeListener(this._onUsernameUpdated);
+        userStore.removeChangeListener(this._onUserUpdated);
         projectStore.removeChangeListener(this._onProjectListUpdated);
     }
 
     _onProjectListUpdated() {
         this.setState({
             projects: projectStore._projects.filter(project => {
-                return project.members.includes(this.state.username);
+                return project.members.includes(this.state.user.id);
             })
         });
     }
@@ -79,10 +77,11 @@ class EventEditorModal extends React.Component {
         });
     }
 
-    _onUsernameUpdated() {
+    _onUserUpdated() {
         this.setState({
-            users: userStore._current_username
+            user: userStore._current_user,
         });
+        fetchAllProjects();
     }
 
     _onSaveChanges() {
@@ -97,7 +96,7 @@ class EventEditorModal extends React.Component {
             startTime: document.getElementById('start_date_input').value + timeZoneOffset,
             endTime: document.getElementById('end_date_input').value + timeZoneOffset,
             place: document.getElementById('place_input').value,
-            participants: [...this.state.memberList, this.state.username],
+            participants: [...this.state.memberList, this.state.user.id],
             notes: this._isEditing() ? document.getElementById('notes_input').value : ''
         };
         if (this._isEditing())
@@ -237,7 +236,7 @@ class EventEditorModal extends React.Component {
                                 this.state.isProjectSelected && <UserAdd members={this.props.meeting == null ? []
                                     : this.props.meeting.participants.map(this._mapToUserWithNameId)}
                                                                          users={this.state.users}
-                                                                         creator={this.state.username}
+                                                                         creator={this.state.user.id}
                                                                          onMemberAdded={this._onMemberAddedToMeeting}
                                                                          onMemberDeleted={this._onMemberDeletedToMeeting}/>
                             }

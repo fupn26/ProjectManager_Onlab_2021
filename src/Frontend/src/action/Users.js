@@ -132,7 +132,7 @@ export function getUserInfo() {
         }
     }).then(response => dispatcher.dispatch({
         action: usernameArrived,
-        payload: response.data.preferred_username
+        payload: response.data
     })).catch(error => logger.error(error));
 }
 

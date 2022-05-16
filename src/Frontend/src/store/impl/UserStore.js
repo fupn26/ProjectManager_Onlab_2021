@@ -4,7 +4,10 @@ import BaseStore from "../BaseStore";
 
 class UserStore extends BaseStore {
     _users = [];
-    _current_username = '';
+    _current_user = {
+        id: null,
+        username: null
+    };
 }
 
 const store = new UserStore();
@@ -15,7 +18,10 @@ dispatcher.register(({action, payload})=>{
         store._users = payload;
         store.emitChange();
     } else if (action === actions.usernameArrived) {
-        store._current_username = payload;
+        store._current_user = {
+            id: payload.sub,
+            username: payload.preferred_username
+        };
         store.emitChange();
     }
 });

@@ -10,7 +10,7 @@ import DropdownItem from "react-bootstrap/DropdownItem";
 const MainNavBar = () => {
     //const history = useHistory();
     const [isLoggedIn, setIsLoggedIn] = useState(sessionStore._isUserLoggedIn);
-    const [username, setUsername] = useState(userStore._current_username);
+    const [username, setUsername] = useState(userStore._current_user.username);
 
     const onLogIn = () => {
         console.log("log in");
@@ -27,7 +27,7 @@ const MainNavBar = () => {
     };
 
     const updateUsername = () => {
-        setUsername(userStore._current_username);
+        setUsername(userStore._current_user.username);
     };
 
     useEffect(() => {

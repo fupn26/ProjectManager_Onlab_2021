@@ -24,7 +24,7 @@ dispatcher.register(({action, payload}) => {
     else if (action === meetingCreated) {
         store._meetings.push({
             ...payload,
-            creatorId: userStore._current_username
+            creatorId: userStore._current_user.id
         });
         store.emitChange();
     }
@@ -33,7 +33,7 @@ dispatcher.register(({action, payload}) => {
         if (meetingIndex >= 0)
             store._meetings[meetingIndex] = {
                 ...payload,
-                creatorId: userStore._current_username
+                creatorId: userStore._current_user.id
             };
     }
     else if (action === meetingDeleted) {

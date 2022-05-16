@@ -2,22 +2,6 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        temp:
-          use_jdbc_metadata_defaults: false
-  datasource:
-    url: "jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB}"
-    username: ${DB_USER}
-    password: ${DB_PASS}
-    hikari:
-      minimum-idle: 0
-      initialization-fail-timeout: -1
   rabbitmq:
     host: ${RABBIT_HOST}
     port: ${RABBIT_PORT}
@@ -29,3 +13,9 @@ admin:
 
 jwt:
   secret: ${JWT_SECRET}
+
+keycloak:
+  base-url: ${KEYCLOAK_BASE_URL}
+  realm: ${KEYCLOAK_REALM}
+  admin-user: ${KEYCLOAK_ADMIN}
+  admin-password: ${KEYCLOAK_ADMIN_PASSWORD}

@@ -4,6 +4,8 @@ EXPOSE 80
 COPY ["nginx.conf", "/etc/nginx/nginx.conf"]
 
 FROM node:14-alpine as build
+ARG REACT_APP_BASE_URL
+ENV REACT_APP_BASE_URL $REACT_APP_BASE_URL
 WORKDIR /src
 COPY ["./", "Client/"]
 WORKDIR /src/Client

@@ -15,3 +15,9 @@ admin:
 
 jwt:
   secret: hello
+
+keycloak:
+  base-url: "http://localhost:5000/keycloak"
+  realm: project_manager_realm
+  admin-user: admin
+  admin-password: admin

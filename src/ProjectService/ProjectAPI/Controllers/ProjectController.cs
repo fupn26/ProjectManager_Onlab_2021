@@ -114,7 +114,7 @@ namespace ProjectAPI.Controllers
 
             if (jwtToken.Subject != project.Owner)
             {
-                return Forbid("Don't hava the rights to modify!");
+                return Unauthorized("Don't have the rights to modify!");
             }
 
             project.Title = projectToUpdate.Title;

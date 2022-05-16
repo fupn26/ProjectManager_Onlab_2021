@@ -23,6 +23,36 @@ services:
     networks:
       - project-network
 
+  authenticator:
+    image: quay.io/keycloak/keycloak:18.0.0
+    command:
+      #- "start-dev"
+      - "start"
+      - "--auto-build"
+      - "--hostname-strict-https=false"
+    ports:
+      - "5010:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_PASSWORD}
+      - KC_DB=mysql
+      - KC_DB_URL_HOST=project_mysql
+      - KC_DB_URL_PORT=3306
+      - KC_DB_URL_DATABASE=${MYSQL_DB}
+      - KC_DB_USERNAME=${MYSQL_USER}
+      - KC_DB_PASSWORD=${MYSQL_PASSWORD}
+      - KC_HTTP_RELATIVE_PATH=keycloak
+      - KC_PROXY=edge
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+    depends_on:
+      - project_mysql
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.authenticator.rule=PathPrefix(`/keycloak/admin`, `/keycloak/js`, `/keycloak/realms`, `/keycloak/resources`, `/keycloak/robots.txt`)"
+    networks:
+      - project-network
+
   project_service:
     image: "${REGISTRY_URL:-microproject}/projects:${IMAGE_TAG:-latest}"
     build:
@@ -49,7 +79,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.project.rule=PathPrefix(`/api/v1/project`)"
-      - "traefik.http.middlewares.project-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.middlewares.project-auth.forwardauth.address=${FORWARD_AUTH_URL}"
       - "traefik.http.routers.project.middlewares=project-auth@docker"
 
   meeting_service:
@@ -69,7 +99,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.meeting.rule=PathPrefix(`/api/v1/meeting`)"
-      - "traefik.http.middlewares.meeting-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.middlewares.meeting-auth.forwardauth.address=${FORWARD_AUTH_URL}"
       - "traefik.http.routers.meeting.middlewares=meeting-auth@docker"
 
   todo_service:
@@ -91,7 +121,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.todo.rule=PathPrefix(`/api/v1/todo`)"
-      - "traefik.http.middlewares.todo-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.middlewares.todo-auth.forwardauth.address=${FORWARD_AUTH_URL}"
       - "traefik.http.routers.todo.middlewares=todo-auth@docker"
 
   comment_service:
@@ -111,7 +141,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`, `/commentHub`)"
-      - "traefik.http.middlewares.comment-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.middlewares.comment-auth.forwardauth.address=${FORWARD_AUTH_URL}"
       - "traefik.http.routers.comment.middlewares=comment-auth@docker"
 
   mail_service:
@@ -155,6 +185,10 @@ services:
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://project_jaeger:14250
       - OTEL_EXPORTER_JAEGER_TIMEOUT=10000
       - OTEL_SERVICE_NAME=users
+      - KEYCLOAK_BASE_URL=http://authenticator:8080/keycloak
+      - KEYCLOAK_REALM=project_manager_realm
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_PASSWORD}
     networks:
       - project-network
     ports:
@@ -167,7 +201,7 @@ services:
       - "traefik.http.routers.register.rule=PathPrefix(`/api/v1/user/register`)"
       - "traefik.http.routers.signin.rule=PathPrefix(`/api/v1/user/signin`)"
       - "traefik.http.routers.user.rule=PathPrefix(`/api/v1/user`)"
-      - "traefik.http.middlewares.user-auth.forwardauth.address=http://users:8080/api/v1/user/auth"
+      - "traefik.http.middlewares.user-auth.forwardauth.address=${FORWARD_AUTH_URL}"
       - "traefik.http.routers.user.middlewares=user-auth@docker"
 
   web:
@@ -175,6 +209,8 @@ services:
     build:
       context: ../src/Frontend
       dockerfile: ./Dockerfile
+      args:
+        - REACT_APP_BASE_URL=${KEYCLOAK_BASE_URL:-http://localhost:5000/keycloak}
     networks:
       - project-network
     labels:
@@ -204,7 +240,7 @@ services:
       - project-network
 
   project_mysql: 
-    image: mysql
+    image: mysql:8
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: example
@@ -221,6 +257,8 @@ services:
     environment:
       SPAN_STORAGE_TYPE: elasticsearch
       ES_SERVER_URLS: http://project_elasticsearch:9200
+    depends_on:
+      - project_elasticsearch
     ports:
       - "6831:6831/udp"
       - "16686:16686"

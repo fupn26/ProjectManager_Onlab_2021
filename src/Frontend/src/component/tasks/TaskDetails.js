@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import {Alert, Button, FormControl, Stack, Table} from "react-bootstrap";
 import userStore from "../../store/impl/UserStore";
 import taskStore from "../../store/impl/TaskStore";
-import {getUsers} from "../../action/Users";
+import {getUserInfo, getUsers} from "../../action/Users";
 import {getTasks} from "../../action/Tasks";
 import projectStore from "../../store/impl/ProjectStore";
 import {fetchAllProjects} from "../../action/Projects";
@@ -14,10 +14,10 @@ import {Redirect} from "react-router-dom";
 import "react-chat-elements/dist/main.css";
 import {MessageList} from "react-chat-elements";
 import commentStore from "../../store/impl/CommentStore";
-import jwtDecode from "jwt-decode";
 import {createComment, getComments} from "../../action/Comments";
 import * as signalR from "@microsoft/signalr";
 import logger from "../../logger/Logger";
+import Cookies from "js-cookie";
 
 class SignalRHub {
     constructor(token, taskId) {
@@ -87,12 +87,17 @@ class TaskDetails extends React.Component {
                 fontWeight: 'bold'
             },
             isUserLoggedIn: sessionStore._isUserLoggedIn,
-            isCommentHubConnected: false
+            isCommentHubConnected: false,
+            user: {
+                id: null,
+                username: null
+            }
         };
     }
 
     componentDidMount() {
         sessionStore.addChangeListener(this._updateSessionStateFromStore);
+        userStore.addChangeListener(this._onUserChanged);
         userStore.addChangeListener(this._onUserListChanged);
         taskStore.addChangeListener(this._onTaskListChanged);
         projectStore.addChangeListener(this._onProjectListChanged);
@@ -105,14 +110,16 @@ class TaskDetails extends React.Component {
         } else {
             logger.info(`Component mounting with task id: ${this.state.taskId}`);
             getUsers();
+            getUserInfo();
             getTasks();
             getComments(this.state.taskId);
-            this._hubConnection = new SignalRHub(localStorage.getItem('token'), this.state.taskId);
+            this._hubConnection = new SignalRHub(Cookies.get('access_token'), this.state.taskId);
         }
     }
 
     componentWillUnmount() {
-        sessionStore.addChangeListener(this._updateSessionStateFromStore);
+        sessionStore.removeChangeListener(this._updateSessionStateFromStore);
+        userStore.removeChangeListener(this._onUserChanged);
         userStore.removeChangeListener(this._onUserListChanged);
         taskStore.removeChangeListener(this._onTaskListChanged);
         projectStore.removeChangeListener(this._onProjectListChanged);
@@ -128,6 +135,12 @@ class TaskDetails extends React.Component {
             });
         }
     }
+
+    _onUserChanged = () => {
+        this.setState({
+            user: userStore._current_user
+        });
+    };
 
     _onCommentListChanged = () => {
         this.setState({
@@ -184,7 +197,7 @@ class TaskDetails extends React.Component {
         if (user != null)
             title = user.username;
         let position = 'left';
-        if (jwtDecode(localStorage.getItem("token")).sub === comment.user)
+        if (this.state.user.id === comment.user)
             position = 'right';
         return {
             position: position,

@@ -2,6 +2,7 @@ import axios from 'axios';
 import dispatcher from '../dispatcher/Dispatcher';
 import {addTask, changeTaskStatus, refreshTasks, removeTask} from "../dispatcher/TaskActionConstants";
 import logger from "../logger/Logger";
+import Cookies from "js-cookie";
 
 export function createTask(projectId, title, description, assignees) {
     axios.post('/api/v1/todo', {
@@ -11,7 +12,7 @@ export function createTask(projectId, title, description, assignees) {
         assignees: assignees
     }, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     })
         .then(response => dispatcher.dispatch({
@@ -24,7 +25,7 @@ export function createTask(projectId, title, description, assignees) {
 export function getTasks(projectId) {
     axios.get('/api/v1/todo', {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         },
         params: {
             projectId: projectId
@@ -40,7 +41,7 @@ export function getTasks(projectId) {
 export function changeStatus(taskId, status) {
     axios.patch(`/api/v1/todo/${taskId}/status/${status}`, {}, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     })
         .then(() => dispatcher.dispatch({
@@ -56,7 +57,7 @@ export function changeStatus(taskId, status) {
 export function deleteTask(taskId) {
     axios.delete(`/api/v1/todo/${taskId}`, {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${Cookies.get("access_token")}`
         }
     }).then(() => dispatcher.dispatch({
         action: removeTask,

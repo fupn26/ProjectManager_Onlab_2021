@@ -6,7 +6,7 @@ import {
     meetingUpdated
 } from "../../dispatcher/MeetingActionConstants";
 import dispatcher from "../../dispatcher/Dispatcher";
-import jwtDecode from "jwt-decode";
+import userStore from "./UserStore";
 
 class MeetingStore extends BaseStore {
     _meetings = [];
@@ -24,7 +24,7 @@ dispatcher.register(({action, payload}) => {
     else if (action === meetingCreated) {
         store._meetings.push({
             ...payload,
-            creatorId: jwtDecode(localStorage.getItem("token")).sub
+            creatorId: userStore._current_user.id
         });
         store.emitChange();
     }
@@ -33,7 +33,7 @@ dispatcher.register(({action, payload}) => {
         if (meetingIndex >= 0)
             store._meetings[meetingIndex] = {
                 ...payload,
-                creatorId: jwtDecode(localStorage.getItem("token")).sub
+                creatorId: userStore._current_user.id
             };
     }
     else if (action === meetingDeleted) {

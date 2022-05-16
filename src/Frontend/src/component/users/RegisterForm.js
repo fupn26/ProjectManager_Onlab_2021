@@ -1,7 +1,6 @@
 import React from 'react';
 import {Alert, Button, FormControl, FormLabel} from "react-bootstrap";
 import {Redirect} from "react-router-dom";
-import {registerUser} from "../../action/Users";
 import sessionStore from "../../store/impl/SessionStore";
 
 class RegisterForm extends React.Component {
@@ -75,7 +74,7 @@ class RegisterForm extends React.Component {
     }
 
     _onSubmit() {
-        registerUser(this.state.email, this.state.username, this.state.password);
+        //registerUser(this.state.email, this.state.username, this.state.password);
     }
 
     _onCancel() {

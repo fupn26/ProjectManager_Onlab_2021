@@ -1,8 +1,6 @@
 import axios from "axios";
 import {
-    loginSuccess,
-    registerFailed,
-    registerSuccess
+    loginSuccess
 } from "../dispatcher/SessionActionConstants";
 import dispatcher from "../dispatcher/Dispatcher";
 import {userListArrived, usernameArrived} from "../dispatcher/UserActionConstants";
@@ -34,11 +32,7 @@ const clientId = 'microproject-app';
 let interval;
 
 export function signIn() {
-/*    keycloak.init({onLoad: initOptions.onLoad, checkLoginIframe: false}).catch(function() {
-        alert('failed to initialize');
-    });
- */
-    window.location.href = `http://localhost:5000/keycloak/realms/project_manager_realm/protocol/openid-connect/auth?client_id=${clientId}&redirect_uri=${window.location.origin}&response_mode=fragment&response_type=code&scope=openid`;
+    window.location.href = `${process.env.REACT_APP_BASE_URL}/realms/project_manager_realm/protocol/openid-connect/auth?client_id=${clientId}&redirect_uri=${window.location.origin}&response_mode=fragment&response_type=code&scope=openid`;
 }
 
 export function retrieveToken(authorizationCode) {
@@ -75,7 +69,7 @@ function refreshToken() {
     params.append('client_id', clientId);
     params.append('refresh_token', Cookies.get('refresh_token'));
 
-    axios.post('/keycloak/realms/project_manager_realm/protocol/openid-connect/token', params, {
+    axios.post(`/keylcoak/realms/project_manager_realm/protocol/openid-connect/token`, params, {
         headers: {
             'Content-type': 'application/x-www-form-urlencoded; charset=utf-8'
         }
@@ -126,7 +120,7 @@ export function getUsers() {
 }
 
 export function getUserInfo() {
-    axios.get('/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo', {
+    axios.get(`/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo`, {
         headers: {
             Authorization: `Bearer ${Cookies.get("access_token")}`
         }
@@ -136,28 +130,8 @@ export function getUserInfo() {
     })).catch(error => logger.error(error));
 }
 
-export function registerUser(email, username, password) {
-    axios.post('/api/v1/user/register', {
-        email: email,
-        username: username,
-        password: password
-    })
-        .then(response => {
-            dispatcher.dispatch({
-                action: registerSuccess,
-                payload: response.data
-            });
-        })
-        .catch(() => {
-            dispatcher.dispatch({
-                action: registerFailed
-            });
-        });
-}
-
 export function logout() {
-    window.location.href = 'http://localhost:5000/keycloak/realms/project_manager_realm/protocol/openid-connect/logout?post_logout_redirect_uri=' + window.location.origin +
-    '&id_token_hint=' + Cookies.get('id_token');
+    window.location.href = `${process.env.REACT_APP_BASE_URL}/realms/project_manager_realm/protocol/openid-connect/logout?post_logout_redirect_uri=${window.location.origin}&id_token_hint=${Cookies.get('id_token')}`;
     Cookies.remove('access_token');
     Cookies.remove('refresh_token');
     Cookies.remove('id_token');

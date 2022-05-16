@@ -30,6 +30,8 @@ services:
       - "start"
       - "--auto-build"
       - "--hostname-strict-https=false"
+    ports:
+      - "5010:8080"
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_PASSWORD}
@@ -43,8 +45,6 @@ services:
       - KC_PROXY=edge
       - KC_HOSTNAME_STRICT=false
       - KC_HTTP_ENABLED=true
-    ports:
-      - "8080:8080"
     depends_on:
       - project_mysql
     labels:
@@ -79,7 +79,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.project.rule=PathPrefix(`/api/v1/project`)"
-      - "traefik.http.middlewares.project-auth.forwardauth.address=http://authenticator:8080/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo"
+      - "traefik.http.middlewares.project-auth.forwardauth.address=${FORWARD_AUTH_URL}"
       - "traefik.http.routers.project.middlewares=project-auth@docker"
 
   meeting_service:
@@ -99,7 +99,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.meeting.rule=PathPrefix(`/api/v1/meeting`)"
-      - "traefik.http.middlewares.meeting-auth.forwardauth.address=http://authenticator:8080/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo"
+      - "traefik.http.middlewares.meeting-auth.forwardauth.address=${FORWARD_AUTH_URL}"
       - "traefik.http.routers.meeting.middlewares=meeting-auth@docker"
 
   todo_service:
@@ -121,7 +121,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.todo.rule=PathPrefix(`/api/v1/todo`)"
-      - "traefik.http.middlewares.todo-auth.forwardauth.address=http://authenticator:8080/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo"
+      - "traefik.http.middlewares.todo-auth.forwardauth.address=${FORWARD_AUTH_URL}"
       - "traefik.http.routers.todo.middlewares=todo-auth@docker"
 
   comment_service:
@@ -141,7 +141,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.comment.rule=PathPrefix(`/api/v1/comment`, `/commentHub`)"
-      - "traefik.http.middlewares.comment-auth.forwardauth.address=http://authenticator:8080/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo"
+      - "traefik.http.middlewares.comment-auth.forwardauth.address=${FORWARD_AUTH_URL}"
       - "traefik.http.routers.comment.middlewares=comment-auth@docker"
 
   mail_service:
@@ -185,6 +185,10 @@ services:
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://project_jaeger:14250
       - OTEL_EXPORTER_JAEGER_TIMEOUT=10000
       - OTEL_SERVICE_NAME=users
+      - KEYCLOAK_BASE_URL=http://authenticator:8080/keycloak
+      - KEYCLOAK_REALM=project_manager_realm
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_PASSWORD}
     networks:
       - project-network
     ports:
@@ -197,7 +201,7 @@ services:
       - "traefik.http.routers.register.rule=PathPrefix(`/api/v1/user/register`)"
       - "traefik.http.routers.signin.rule=PathPrefix(`/api/v1/user/signin`)"
       - "traefik.http.routers.user.rule=PathPrefix(`/api/v1/user`)"
-      - "traefik.http.middlewares.user-auth.forwardauth.address=http://authenticator:8080/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo"
+      - "traefik.http.middlewares.user-auth.forwardauth.address=${FORWARD_AUTH_URL}"
       - "traefik.http.routers.user.middlewares=user-auth@docker"
 
   web:

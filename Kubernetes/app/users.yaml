@@ -84,6 +84,16 @@ spec:
                 secretKeyRef:
                   name: mysql-secret
                   key: user_password
+            - name: OTEL_TRACES_EXPORTER
+              value: jaeger
+            - name: OTEL_EXPORTER_JAEGER_ENDPOINT
+              value: http://jaeger-collector:14250
+            - name: OTEL_EXPORTER_JAEGER_TIMEOUT
+              value: "10000"
+            - name: OTEL_SERVICE_NAME
+              value: users
+            - name: OTEL_METRICS_EXPORTER
+              value: none
       restartPolicy: Always
 ---
 apiVersion: networking.k8s.io/v1

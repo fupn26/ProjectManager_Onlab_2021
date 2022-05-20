@@ -59,6 +59,10 @@ spec:
                   key: user_password
             - name: UserServiceSettings__BaseUrl
               value: "http://users:80"
+            - name: JaegerSettings__Host
+              value: jaeger-agent
+            - name: JaegerSettings__Port
+              value: "6832"
       restartPolicy: Always
 ---
 apiVersion: networking.k8s.io/v1

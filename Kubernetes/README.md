@@ -21,7 +21,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: mysql-secret
-type: kubernetes.io/basic-auth
+type: Opaque
 stringData:
   db_name: # the name of the database which will store the users
   username: # the user which will be used for database connection
@@ -36,13 +36,13 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: rabbitmq-secret
-type: kubernetes.io/basic-auth
+type: Opaque
 stringData:
   username: # your value
   user_password: # your value
 ```
 ### Secrets for App
-Create these files in ```Kubernetes/app``` directory
+Create these files in ```Kubernetes/secret``` directory
 #### Mail Service secret
 ```yaml
 apiVersion: v1
@@ -61,7 +61,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: users-secret
-type: kubernetes.io/basic-auth
+type: Opaque
 stringData:
   jwt_secret: # value which is used for generating JWT tokens
   admin_password: # the password of the deafult admin user
@@ -71,23 +71,57 @@ stringData:
 1. Navigate to ```Kubernetes``` directory
 2. ```kubectl apply -f secret```
 
+## Install Databases
+1. Navigate to ```Kubernetes``` directory
+2. ```kubectl apply -f db```
+
+## Install Jaeger
+1. ```helm repo add jaegertracing https://jaegertracing.github.io/helm-charts```
+2. ```helm repo update```
+3. Install jaeger with helm:
+```bash
+helm install jaeger 
+  jaegertracing/jaeger \
+    --set provisionDataStore.cassandra=false \
+    --set storage.type=elasticsearch \
+    --set storage.elasticsearch.host=elasticsearch \
+    --set storage.elasticsearch.port=9200
+```
+4. Acessing UI from outside:
+```bash
+$ export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/instance=jaeger,app.kubernetes.io/component=query" -o jsonpath="{.items[0].metadata.name}")
+
+$ kubectl port-forward --namespace default $POD_NAME 8080:16686
+```
+
+
 ## Install Ingress Controller
 1. ```helm repo add traefik https://helm.traefik.io/traefik```
 2. ```helm repo update```
 3. ```helm install traefik traefik/traefik --set ports.web.nodePort=32080 --set service.type=NodePort```
     - The services will be available through port ```32080```
+    - In case if you are using ```minikube```, you need to create a tunnel to the cluster:
+      ```bash
+      minikube service traefik --url
+      ```
 4. ```kubectl port-forward $(kubectl get pods --selector "app.kubernetes.io/name=traefik" --output=name) 9000:9000```
     - __Caution__: It should be authenticated. Use this solution only in dev enviroment.
-## Install Databases
-1. Navigate to ```Kubernetes``` directory
-2. ```kubectl apply -f db```
+
 ## Install Services
 1. Navigate to ```Kubernetes``` directory
 2. ```kubectl apply -f service```
     - Currently it contains only the RabbitMq service descriptor.
 ## Install App
 1. Set the ```IMAGE_TAG``` enviromental variable to ```v1```
+  - __Linux__:
+    ```bash
+    export IMAGE_TAG=v1
+    ```
+  - __Windows__:
+    ```ps
+    $env:IMAGE_TAG = 'v1'
+    ```
 2. Navigate to ```Docker``` directory
-3. ```docker-compose build```
+3. ```docker-compose -f docker-compose.dev.yml build```
 4. Navigate to ```Kubernetes``` dierctory
 5. ```kubectl apply -f app```

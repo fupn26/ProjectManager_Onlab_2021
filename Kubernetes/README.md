@@ -94,7 +94,6 @@ $ export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/i
 $ kubectl port-forward --namespace default $POD_NAME 8080:16686
 ```
 
-
 ## Install Ingress Controller
 1. ```helm repo add traefik https://helm.traefik.io/traefik```
 2. ```helm repo update```
@@ -112,14 +111,16 @@ $ kubectl port-forward --namespace default $POD_NAME 8080:16686
 2. ```kubectl apply -f service```
     - Currently it contains only the RabbitMq service descriptor.
 ## Install App
-1. Set the ```IMAGE_TAG``` enviromental variable to ```v1```
+1. Set the ```IMAGE_TAG``` and the ```KEYCLOAK_BASE_URL``` environmantal variables
   - __Linux__:
     ```bash
     export IMAGE_TAG=v1
+    export KEYCLOAK_BASE_URL=http://localhost:32080/keycloak
     ```
   - __Windows__:
     ```ps
     $env:IMAGE_TAG = 'v1'
+    $env:KEYCLOAK_BASE_URL = 'http://localhost:32080/keycloak'
     ```
 2. Navigate to ```Docker``` directory
 3. ```docker-compose -f docker-compose.dev.yml build```

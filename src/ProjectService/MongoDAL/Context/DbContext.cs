@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
 using MongoDAL.Settings;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver.Core.Extensions.DiagnosticSources;
 
 namespace MongoDAL.Context
 {
@@ -11,7 +12,9 @@ namespace MongoDAL.Context
 
         public DbContext(IOptions<DbSettings> settings)
         {
-            _client = new MongoClient(settings.Value.ConnectionString);
+            var clientSettings = MongoClientSettings.FromConnectionString(settings.Value.ConnectionString);
+            clientSettings.ClusterConfigurator = cb => cb.Subscribe(new DiagnosticsActivityEventSubscriber());
+            _client = new MongoClient(clientSettings);
             _db = _client.GetDatabase(settings.Value.DatabaseName);
         }
 

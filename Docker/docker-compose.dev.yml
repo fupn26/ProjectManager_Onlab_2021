@@ -8,10 +8,14 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--api.dashboard=true"
+      - "--log.level=DEBUG"
       - "--tracing.jaeger=true"
       - "--tracing.servicename=traefik"
       - "--tracing.jaeger.samplingParam=1.0"
       - "--tracing.jaeger.samplingType=const"
+      - "--tracing.jaeger.propagation=jaeger"
+      - "--tracing.jaeger.traceContextHeaderName=uber-trace-id"
+      #- "--tracing.jaeger.gen128Bit=true"
       - "--tracing.jaeger.localAgentHostPort=project_jaeger:6831"
       - "--tracing.jaeger.samplingServerURL=http://project_jaeger:5778/sampling"
     ports:
@@ -185,6 +189,7 @@ services:
       - OTEL_EXPORTER_JAEGER_ENDPOINT=http://project_jaeger:14250
       - OTEL_EXPORTER_JAEGER_TIMEOUT=10000
       - OTEL_SERVICE_NAME=users
+      - OTEL_METRICS_EXPORTER=none
       - KEYCLOAK_BASE_URL=http://authenticator:8080/keycloak
       - KEYCLOAK_REALM=project_manager_realm
       - KEYCLOAK_ADMIN=admin
@@ -232,7 +237,7 @@ services:
       - project-network
 
   project_rabbit:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.8-management-alpine
     ports:
       - 5672:5672
       - 15672:15672
@@ -262,6 +267,7 @@ services:
     ports:
       - "6831:6831/udp"
       - "16686:16686"
+      - "12345:12345"
     networks:
       - project-network
 
@@ -270,7 +276,7 @@ services:
     image: elasticsearch:7.17.3
     environment:
       discovery.type: single-node
-      xpack.security.enabled: false
+      xpack.security.enabled: "false"
     ports:
       - "9200:9200"
       - "9300:9300"

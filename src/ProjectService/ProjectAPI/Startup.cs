@@ -7,7 +7,6 @@ using Microsoft.OpenApi.Models;
 using ProjectAPI.Repositories;
 using MongoDAL.Settings;
 using MongoDAL.Context;
-using MassTransit;
 using MessagingService.Settings;
 using MessagingService;
 using Refit;
@@ -99,6 +98,7 @@ namespace ProjectAPI
                                 .AddService(serviceName: _serviceName, serviceVersion: _serviceVersion)
                             )
                             .AddAspNetCoreInstrumentation()
+                            .AddMongoDBInstrumentation()
                         );
         }
 

@@ -43,9 +43,11 @@ namespace ProjectAPI
         {
             AddConfigurations(services);
             AddServices(services);
-            AddOpenTelemetry(services);
             AddPolly(services);
 
+            // AddOpenTelemetry(services); It should be used, since OpenTracing is deprecated.
+
+            services.AddJaeger(Configuration.GetSection(_nameOfJaegerSettings).Get<JaegerSettings>());
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

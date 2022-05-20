@@ -1,7 +1,9 @@
 ﻿using MongoDB.Driver;
 using MongoDAL.Settings;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver.Core.Extensions.DiagnosticSources;
+using OpenTracing.Contrib.MongoDB;
+// In case we want to use OpenTelemetry
+//using MongoDB.Driver.Core.Extensions.DiagnosticSources;
 
 namespace MongoDAL.Context
 {

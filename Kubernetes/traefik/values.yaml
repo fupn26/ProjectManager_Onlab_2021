@@ -1,0 +1,24 @@
+ports:
+  web:
+    nodePort: 32080
+
+service:
+  type: NodePort
+
+additionalArguments:
+  - "--tracing.jaeger=true"
+  - "--tracing.servicename=traefik"
+  - "--tracing.jaeger.samplingParam=1.0"
+  - "--tracing.jaeger.samplingType=const"
+  - "--tracing.jaeger.propagation=jaeger"
+  - "--tracing.jaeger.traceContextHeaderName=uber-trace-id"
+  - "--tracing.jaeger.localAgentHostPort=jaeger-agent:6831"
+  - "--tracing.jaeger.samplingServerURL=http://jaeger-agent:5778/sampling"
+  - "--log.level=DEBUG"
+
+# It shouldn't be needed. The problem is something like this: https://github.com/traefik/traefik/issues/8691
+env:
+  - name: JAEGER_AGENT_PORT
+    value: "5775"
+  - name: JAEGER_AGENT_HOST
+    value: "jaeger-agent"

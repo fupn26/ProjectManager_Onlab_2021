@@ -95,9 +95,10 @@ $ kubectl port-forward --namespace default $POD_NAME 8080:16686
 ```
 
 ## Install Ingress Controller
+0. Navigate to ```Kubernetes``` directory
 1. ```helm repo add traefik https://helm.traefik.io/traefik```
 2. ```helm repo update```
-3. ```helm install traefik traefik/traefik --set ports.web.nodePort=32080 --set service.type=NodePort```
+3. ```helm install traefik traefik/traefik --values traefik/values.yaml```
     - The services will be available through port ```32080```
     - In case if you are using ```minikube```, you need to create a tunnel to the cluster:
       ```bash
@@ -109,7 +110,7 @@ $ kubectl port-forward --namespace default $POD_NAME 8080:16686
 ## Install Services
 1. Navigate to ```Kubernetes``` directory
 2. ```kubectl apply -f service```
-    - Currently it contains only the RabbitMq service descriptor.
+
 ## Install App
 1. Set the ```IMAGE_TAG``` and the ```KEYCLOAK_BASE_URL``` environmantal variables
   - __Linux__:

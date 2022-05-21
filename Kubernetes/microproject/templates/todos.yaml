@@ -60,7 +60,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     microproject.tier: backend
   annotations:
-    traefik.ingress.kubernetes.io/auth-url: http://users:8080/api/v1/user/auth
+    traefik.ingress.kubernetes.io/auth-url: http://keycloak/keycloak/realms/project_manager_realm/protocol/openid-connect/userinfo
     traefik.ingress.kubernetes.io/auth-response-headers: Authorization
     traefik.ingress.kubernetes.io/auth-type: forward
 spec:

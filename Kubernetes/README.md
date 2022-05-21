@@ -113,17 +113,19 @@ $ kubectl port-forward --namespace default $POD_NAME 8080:16686
 
 ## Install App
 1. Set the ```IMAGE_TAG``` and the ```KEYCLOAK_BASE_URL``` environmantal variables
-  - __Linux__:
+    - __Linux__:
     ```bash
     export IMAGE_TAG=v1
-    export KEYCLOAK_BASE_URL=http://localhost:32080/keycloak
+    export KEYCLOAK_BASE_URL=http://<YOUR_CHOOSED_HOSTNAME>:32080/keycloak
     ```
-  - __Windows__:
+    - __Windows__:
     ```ps
     $env:IMAGE_TAG = 'v1'
-    $env:KEYCLOAK_BASE_URL = 'http://localhost:32080/keycloak'
+    $env:KEYCLOAK_BASE_URL = 'http://<YOUR_CHOSED_HOSTNAME>:32080/keycloak'
     ```
+    - __Caution__: It is really important to rebuild at least the ```web``` service in case you want to change the keycloak base url.
 2. Navigate to ```Docker``` directory
 3. ```docker-compose -f docker-compose.dev.yml build```
 4. Navigate to ```Kubernetes``` dierctory
-5. ```kubectl apply -f app```
+5. ```helm upgrade microproject --install microproject```
+    - The defualt value of ```tag``` is ```v1``` for each service image in the [values.yaml](microproject/values.yaml). If you want to change these values you can either change them in the file or add ```--set <service_name>.tag``` for each service. 

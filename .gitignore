@@ -627,6 +627,9 @@ FodyWeavers.xsd
 # PDF of documentation
 *.pdf
 
+# HTML of documentation
+*.html
+
 # JetBrains Rider
 
 ### VisualStudio Patch ###
